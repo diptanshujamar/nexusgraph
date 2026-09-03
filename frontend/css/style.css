@@ -1,0 +1,471 @@
+:root {
+    --bg-darker: #090d16;
+    --bg-dark: #0f172a;
+    --bg-surface: #1e293b;
+    --border-color: #334155;
+    
+    --color-suspect: #ef4444;     /* Vibrant Red */
+    --color-account: #f59e0b;     /* Warm Amber/Gold */
+    --color-location: #10b981;    /* Emerald Green */
+    --color-fir: #0284c7;         /* Deep Sky / Ocean */
+    --color-phone: #3b82f6;       /* Vibrant Blue */
+    --color-vehicle: #8b5cf6;     /* Vivid Purple */
+    
+    --canvas-sky-blue: #87CEEB;   /* Strictly Sky Blue */
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-darker);
+    color: #f8fafc;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.bg-darker {
+    background-color: var(--bg-darker) !important;
+}
+
+.bg-surface {
+    background-color: var(--bg-surface) !important;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.tracking-wide {
+    letter-spacing: 0.08em;
+}
+
+.fw-extrabold {
+    font-weight: 800;
+}
+
+.tiny-text {
+    font-size: 0.72rem;
+}
+
+.small-caps {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Systematic Main Nav Pills in Navbar */
+.main-nav-pills .nav-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8;
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.18s ease;
+}
+
+.main-nav-pills .nav-link:hover {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #475569;
+}
+
+.main-nav-pills .nav-link.active {
+    color: #ffffff;
+    background: #2563eb;
+    border-color: #3b82f6;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+}
+
+/* App View Containers */
+.app-view {
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+}
+
+.app-view.active {
+    display: block !important;
+}
+
+/* Metric Ticker Bar in Graph View */
+.metric-ticker {
+    font-size: 0.75rem;
+    background: #0f172a;
+}
+
+/* Main Graph Layout */
+.main-container {
+    height: calc(100vh - 90px);
+}
+
+.left-sidebar {
+    width: 270px;
+    min-width: 270px;
+    background: var(--bg-dark);
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* D3 SVG Canvas Viewport: STRICTLY SKY BLUE */
+.graph-canvas-container {
+    height: 100%;
+    background-color: #87CEEB !important; /* Mandatory Sky Blue */
+    background: #87CEEB !important;
+    overflow: hidden;
+    position: relative;
+}
+
+#network-svg {
+    background-color: #87CEEB !important; /* Mandatory Sky Blue */
+    background: #87CEEB !important;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Floating Hover Tooltip */
+#graph-tooltip {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid #60a5fa;
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    color: #f8fafc;
+    font-size: 0.78rem;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    max-width: 280px;
+}
+
+/* Detail Sidebar */
+.detail-sidebar {
+    width: 380px;
+    min-width: 380px;
+    background: var(--bg-dark);
+    height: 100%;
+    transition: all 0.25s ease-in-out;
+    overflow-y: auto;
+}
+
+.detail-sidebar.collapsed {
+    margin-right: -380px;
+}
+
+/* Filter buttons */
+.filter-btn-group .btn {
+    border-color: var(--border-color);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.filter-btn-group .btn.active {
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+    border-color: #60a5fa;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 3px;
+}
+
+.btn-xs {
+    padding: 0.2rem 0.45rem;
+    font-size: 0.72rem;
+    border-radius: 4px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.status-dot.online {
+    background-color: #22c55e !important;
+    box-shadow: 0 0 6px #22c55e;
+}
+
+.status-dot.offline {
+    background-color: #eab308 !important;
+}
+
+/* D3 Graph Elements on Sky Blue Canvas */
+.graph-link {
+    stroke-opacity: 0.75;
+    transition: stroke-opacity 0.2s, stroke-width 0.2s;
+}
+
+.graph-link.link-transfer {
+    stroke: #b45309;
+    stroke-width: 2.5px;
+}
+
+.graph-link.link-colocated {
+    stroke: #6d28d9;
+    stroke-width: 2.5px;
+    stroke-dasharray: 4, 3;
+}
+
+.graph-link.link-simchurn {
+    stroke: #0284c7;
+    stroke-width: 3.5px;
+    stroke-dasharray: 6, 2;
+}
+
+.graph-link:hover, .graph-link.highlighted {
+    stroke-opacity: 1;
+    stroke-width: 4.5px !important;
+    filter: drop-shadow(0 0 6px rgba(15, 23, 42, 0.8));
+}
+
+.graph-link.story-active {
+    stroke: #ef4444 !important;
+    stroke-width: 5px !important;
+    stroke-dasharray: 8, 4;
+    animation: dash-flow 1s linear infinite;
+}
+
+@keyframes dash-flow {
+    to {
+        stroke-dashoffset: -24;
+    }
+}
+
+/* Syndicate Cluster Boundary Hulls */
+.cluster-hull {
+    fill-opacity: 0.14;
+    stroke-width: 2px;
+    stroke-dasharray: 6, 4;
+    transition: fill-opacity 0.3s ease, stroke 0.3s ease;
+}
+
+.cluster-hull:hover {
+    fill-opacity: 0.24;
+    stroke-width: 2.8px;
+}
+
+.cluster-title-pill {
+    fill: rgba(15, 23, 42, 0.9);
+    stroke-width: 1px;
+    rx: 5px;
+    ry: 5px;
+}
+
+.cluster-title-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    fill: #ffffff;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+}
+
+/* Link Label Background Pill */
+.link-label-rect {
+    fill: rgba(15, 23, 42, 0.9);
+    stroke-width: 1px;
+    rx: 3px;
+    ry: 3px;
+}
+
+.graph-link-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    fill: #f8fafc;
+    pointer-events: none;
+}
+
+/* Node Elements */
+.graph-node {
+    cursor: pointer;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.graph-node:hover {
+    filter: drop-shadow(0 0 12px rgba(15, 23, 42, 0.95));
+}
+
+.graph-node.selected circle.node-core {
+    stroke: #ffffff;
+    stroke-width: 4px;
+    filter: drop-shadow(0 0 16px #0f172a);
+}
+
+.graph-node.dimmed {
+    opacity: 0.12;
+}
+
+/* Node Label Dark Capsule */
+.node-label-pill {
+    fill: rgba(15, 23, 42, 0.88);
+    stroke: rgba(255, 255, 255, 0.25);
+    stroke-width: 0.8px;
+    rx: 4px;
+    ry: 4px;
+    pointer-events: none;
+}
+
+.node-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    fill: #ffffff;
+    pointer-events: none;
+}
+
+.node-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    fill: #ffffff;
+    pointer-events: none;
+    font-weight: bold;
+}
+
+/* Pulsing Alert Halo */
+@keyframes pulse-ring-red {
+    0% {
+        r: 16;
+        opacity: 0.9;
+    }
+    50% {
+        r: 34;
+        opacity: 0.2;
+    }
+    100% {
+        r: 16;
+        opacity: 0.9;
+    }
+}
+
+.pulsing-ring {
+    animation: pulse-ring-red 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    transform-origin: center;
+}
+
+/* Interactive Crime Story Narrator Floating Bar */
+.crime-story-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(12px);
+    border: 1px solid #38bdf8;
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    max-width: 780px;
+    width: calc(100% - 32px);
+}
+
+/* Cryptographic SHA-256 Box */
+.crypto-hash-box {
+    background: #090d16;
+    border: 1px dashed #3b82f6;
+    border-radius: 6px;
+    padding: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.73rem;
+    word-break: break-all;
+    color: #60a5fa;
+}
+
+/* Interactive Scenario Cards */
+.hover-card {
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-2px);
+    border-color: #3b82f6 !important;
+    background: rgba(31, 41, 55, 0.95) !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Evidence text box */
+.evidence-card {
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+#search-results-dropdown {
+    width: 100% !important;
+    z-index: 2050 !important;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #0f172a !important;
+    border: 1px solid #3b82f6 !important;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8) !important;
+}
+
+#search-results-dropdown .dropdown-item {
+    color: #e2e8f0 !important;
+    transition: background 0.15s ease;
+}
+
+#search-results-dropdown .dropdown-item:hover {
+    background: #1e293b !important;
+    color: #ffffff !important;
+}
+
+/* Leaflet Map Custom Styling */
+.leaflet-container {
+    background-color: #0b0f19 !important;
+}
+
+.leaflet-popup-content-wrapper {
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(8px);
+    color: #f8fafc !important;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.leaflet-popup-tip {
+    background: #0f172a !important;
+}
+
+.map-city-marker {
+    background: #ef4444;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.map-tower-marker {
+    background: #8b5cf6;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}

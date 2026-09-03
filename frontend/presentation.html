@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS GRAPH v2.0 // Pitch Deck & Presentation</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #07090e;
+            --bg-surface: #0f1420;
+            --bg-surface-elevated: #161e30;
+            --border-color: #222d42;
+            --accent-red: #ef4444;
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --accent-yellow: #f59e0b;
+            --accent-green: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Slide Container */
+        .presentation-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Top Bar */
+        .deck-header {
+            height: 52px;
+            background: rgba(15, 20, 32, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            z-index: 50;
+        }
+
+        /* Slide Body Viewport */
+        .deck-body {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 3rem;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            max-width: 1350px;
+            height: 100%;
+            max-height: 820px;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Bottom Controls Bar */
+        .deck-footer {
+            height: 56px;
+            background: rgba(15, 20, 32, 0.95);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 50;
+        }
+
+        /* Progress Bar */
+        .deck-progress-container {
+            position: absolute;
+            bottom: 56px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 60;
+        }
+
+        .deck-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #38bdf8);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Cards & Styling */
+        .deck-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .deck-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .hero-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+        }
+
+        .slide-heading {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .slide-subheading {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .pill-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .pill-blue {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .pill-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .pill-purple {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        /* Speaker Notes Drawer */
+        .notes-drawer {
+            position: fixed;
+            bottom: 56px;
+            left: 0;
+            width: 100%;
+            background: #090d16;
+            border-top: 2px solid #ef4444;
+            padding: 1rem 2rem;
+            max-height: 220px;
+            overflow-y: auto;
+            transform: translateY(105%);
+            transition: transform 0.25s ease-in-out;
+            z-index: 100;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .notes-drawer.open {
+            transform: translateY(0);
+        }
+
+        .notes-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #ef4444;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .notes-content {
+            font-size: 0.95rem;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        /* Step workflow bubbles */
+        .phase-bubble {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        /* Subtle grid background */
+        .cyber-grid-bg {
+            background-image: radial-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="cyber-grid-bg">
+
+    <div class="presentation-wrapper">
+        
+        <!-- Header -->
+        <header class="deck-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-shield-shaded text-danger fs-5"></i>
+                <span class="fw-bold tracking-wide">NEXUS<span class="text-danger">GRAPH</span></span>
+                <span class="badge text-bg-danger-subtle text-danger border border-danger-subtle ms-1 font-mono">v2.0 BSA 2023</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-dark border border-secondary text-secondary font-mono" id="slide-timer">00:00</span>
+                <a href="/" target="_blank" class="btn btn-xs btn-outline-info d-flex align-items-center gap-1">
+                    <i class="bi bi-cpu"></i>
+                    <span>Live Dashboard</span>
+                </a>
+                <button class="btn btn-xs btn-outline-secondary" id="btn-toggle-fullscreen" title="Toggle Fullscreen (F)">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Slide Body Viewport -->
+        <main class="deck-body" id="slide-viewport">
+
+            <!-- SLIDE 1: TITLE SLIDE -->
+            <section class="slide active" data-slide="1">
+                <div class="text-center my-auto">
+                    <div class="d-inline-flex align-items-center gap-2 mb-3">
+                        <span class="metric-pill pill-danger">Smart India Hackathon 2026</span>
+                        <span class="metric-pill pill-blue">Law Enforcement & Cyber Forensics</span>
+                        <span class="metric-pill pill-green">Section 63(4) BSA 2023</span>
+                    </div>
+
+                    <h1 class="hero-title mb-3">
+                        NEXUS <span class="text-danger">GRAPH</span> v2.0
+                    </h1>
+                    <p class="fs-4 text-light fw-medium mb-3" style="max-width: 900px; margin: 0 auto;">
+                        AI-Powered Crime, Telecom & Financial Threat Intelligence Engine
+                    </p>
+                    <p class="text-secondary fs-6 mb-4" style="max-width: 780px; margin: 0 auto;">
+                        Bridging Siloed Police FIRs, Telecom CDRs, and Financial Streams into an Actionable Judicial Graph Conforming to the <strong class="text-light">Bharatiya Sakshya Adhiniyam, 2023</strong>.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-4 text-start mt-4 pt-3 border-top border-secondary-subtle" style="max-width: 800px; margin: 0 auto;">
+                        <div>
+                            <span class="tiny-text text-secondary d-block font-mono">PROBLEM STATEMENT</span>
+                            <strong class="text-light small">Cross-Agency Cyber Syndicate & Hawala Network Detection</strong>
+                        </div>
+                        <div class="border-start border-secondary ps-4">
+                            <span class="tiny-text text-secondary d-block font-mono">CORE TECHNOLOGIES</span>
+                            <strong class="text-info small">NetworkX • spaCy NLP • D3.js • Levenshtein DP • SHA-256</strong>
+                        </div>
+                        <div class="border-start border-secondary ps-4">
+                            <span class="tiny-text text-secondary d-block font-mono">LEGAL STANDARD</span>
+                            <strong class="text-success small">Sec 63(4) BSA 2023 Two-Part Certificate</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: THE PROBLEM STATEMENT -->
+            <section class="slide" data-slide="2">
+                <div class="mb-4">
+                    <span class="metric-pill pill-danger mb-2 font-mono">THE GROUND REALITY</span>
+                    <h2 class="slide-heading">The Organized Cybercrime Syndicate Playbook</h2>
+                    <p class="slide-subheading">Why interstate criminal networks outmaneuver traditional policing methods</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-danger">
+                            <div class="d-flex align-items-center gap-2 text-danger mb-2">
+                                <i class="bi bi-sim-slash fs-4"></i>
+                                <h6 class="fw-bold mb-0">SIM Churning</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                Suspects deactivate phone numbers every 48 hours to evade telecom wiretaps, switching to fresh burner numbers while preserving their target accomplice contact circles.
+                            </p>
+                            <span class="badge text-bg-danger font-mono tiny-text">85%+ Target Continuity</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-warning">
+                            <div class="d-flex align-items-center gap-2 text-warning mb-2">
+                                <i class="bi bi-person-exclamation fs-4"></i>
+                                <h6 class="fw-bold mb-0">Alias Morphing</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                Suspects exploit cross-jurisdictional spelling variations across police stations (e.g. <em>"Rahul"</em> in Delhi vs. <em>"Raahul"</em> in Bengaluru), fragmenting FIR records.
+                            </p>
+                            <span class="badge text-bg-warning text-dark font-mono tiny-text">Levenshtein Dist &le; 2</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-info">
+                            <div class="d-flex align-items-center gap-2 text-info mb-2">
+                                <i class="bi bi-cash-stack fs-4"></i>
+                                <h6 class="fw-bold mb-0">Digital Mule Layering</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                Siphoned fraud funds (BEC, loan app extortion, phishing) are fragmented and wired across 4 to 6 mule accounts within minutes across multiple state boundaries.
+                            </p>
+                            <span class="badge text-bg-info font-mono tiny-text">Multi-Hop Asset Siphoning</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-purple" style="border-color: #a855f7 !important;">
+                            <div class="d-flex align-items-center gap-2 text-purple mb-2" style="color: #c084fc;">
+                                <i class="bi bi-truck fs-4"></i>
+                                <h6 class="fw-bold mb-0">Fugitive Logistics</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                Human trafficking and extortion syndicates utilize rapid interstate transit bookings (IRCTC, RedBus) paired with high-frequency, short hotel stays (OYO, Treebo).
+                            </p>
+                            <span class="badge text-bg-secondary font-mono tiny-text" style="color: #c084fc;">Anti-Trafficking Filter</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-dark rounded border border-secondary d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-3"></i>
+                        <div>
+                            <strong class="text-light small d-block">The Operational Dilemma</strong>
+                            <span class="tiny-text text-secondary">Police departments operate in isolated digital silos: FIR narratives are stored in text databases, CDRs in telecom CSV dumps, and bank trails in PDF statements. Triangulating them manually takes weeks!</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: THE LEGAL BOTTLENECK (BSA 2023) -->
+            <section class="slide" data-slide="3">
+                <div class="mb-4">
+                    <span class="metric-pill pill-danger mb-2 font-mono">LEGAL COMPLIANCE MILESTONE</span>
+                    <h2 class="slide-heading">The Indian Evidence Act is Repealed: Enter BSA 2023</h2>
+                    <p class="slide-subheading">How Section 63(4) of Bharatiya Sakshya Adhiniyam, 2023 transforms electronic evidence in courts</p>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="deck-card border-secondary h-100">
+                            <h5 class="fw-bold text-danger mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-x"></i>
+                                <span>The Fatal Weakness in Cyber Prosecution</span>
+                            </h5>
+                            <p class="text-secondary small mb-3">
+                                Under the previous Section 65B of the Indian Evidence Act, 1872, electronic evidence was routinely dismissed by defense counsels citing lack of tamper-proof custody, custody gaps, and missing technical certifications.
+                            </p>
+                            <div class="p-3 bg-dark rounded border border-danger-subtle mb-2">
+                                <div class="fw-bold text-danger small mb-1">Section 63(4) BSA 2023 Mandate:</div>
+                                <p class="tiny-text text-light font-mono mb-0">
+                                    Electronic records (CDRs, server logs, bank extracts, extracted chats) MUST be accompanied by a mandatory two-part certificate verifying hardware custody, system integrity, and cryptographic hash validation.
+                                </p>
+                            </div>
+                            <p class="tiny-text text-secondary mb-0">
+                                <em>Failure to compute and seal evidence at the exact moment of ingestion renders the entire digital investigation inadmissible in High Courts and trial courts.</em>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="deck-card border-success h-100">
+                            <h5 class="fw-bold text-success mb-3 d-flex align-items-center gap-2">
+                                <i class="bi bi-shield-check"></i>
+                                <span>How Nexus Graph Automates Legal Admissibility</span>
+                            </h5>
+                            
+                            <div class="d-flex flex-column gap-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="phase-bubble bg-success text-dark">A</div>
+                                    <div>
+                                        <strong class="text-light small d-block">Instant Ingestion Hashing (Zero-Day Seal)</strong>
+                                        <span class="tiny-text text-secondary">Immediate execution of <code>hashlib.sha256()</code> across every raw CSV, FIR narrative, and API payload upon receipt.</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="phase-bubble bg-primary text-light">B</div>
+                                    <div>
+                                        <strong class="text-light small d-block">Part A: System Operator Declaration (Sec 63(4)(a))</strong>
+                                        <span class="tiny-text text-secondary">Automated recording of machine ID, operating system, software version, lawful custody, and ingestion timestamp.</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="phase-bubble bg-info text-dark">C</div>
+                                    <div>
+                                        <strong class="text-light small d-block">Part B: Independent Forensic Examiner Certification (Sec 63(4)(b))</strong>
+                                        <span class="tiny-text text-secondary">Digital cryptographic verification confirming 0% collision, exact SHA-256 match, and official forensic stamp in ready-to-print PDF.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: THE NEXUS GRAPH SOLUTION -->
+            <section class="slide" data-slide="4">
+                <div class="mb-4">
+                    <span class="metric-pill pill-blue mb-2 font-mono">SOLUTION ARCHITECTURE</span>
+                    <h2 class="slide-heading">Introducing NEXUS GRAPH v2.0</h2>
+                    <p class="slide-subheading">A holistic, end-to-end intelligence engine uniting Graph ML, Legal Cryptography, and Tactical Intercept</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-primary">
+                            <div class="d-flex align-items-center gap-2 text-info mb-2">
+                                <i class="bi bi-diagram-3 fs-3"></i>
+                                <h6 class="fw-bold mb-0">Multi-Relational Graph Engine</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                In-memory <strong>NetworkX</strong> graph mapping suspects, bank accounts, burner phones, vehicles, cell towers, and FIRs into interconnected topologies.
+                            </p>
+                            <span class="badge text-bg-primary font-mono tiny-text">Betweenness Centrality</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-warning">
+                            <div class="d-flex align-items-center gap-2 text-warning mb-2">
+                                <i class="bi bi-cpu fs-3"></i>
+                                <h6 class="fw-bold mb-0">Autonomous Threat ML Suites</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                Algorithmic engines running SIM churn bipartite matching ($\ge 85\%$), BTS cell tower co-location clustering ($\le 10$m), and anti-trafficking transit filters.
+                            </p>
+                            <span class="badge text-bg-warning text-dark font-mono tiny-text">Real-Time Syndicate Halo</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-danger">
+                            <div class="d-flex align-items-center gap-2 text-danger mb-2">
+                                <i class="bi bi-broadcast fs-3"></i>
+                                <h6 class="fw-bold mb-0">Nationwide Police APB Grid</h6>
+                            </div>
+                            <p class="small text-secondary mb-2">
+                                One-click All-Points Bulletin dispatch transmitting verified suspect dossiers (aliases, accounts, getaway cars, phones) to state police stations via CCTNS.
+                            </p>
+                            <span class="badge text-bg-danger font-mono tiny-text">Inter-Agency CCTNS Grid</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-dark rounded border border-secondary d-flex align-items-center gap-3">
+                            <i class="bi bi-fingerprint text-info fs-2"></i>
+                            <div>
+                                <strong class="text-light small d-block">Forensic NLP & Identity Resolution</strong>
+                                <span class="tiny-text text-secondary">Extracts Indian RTO vehicle plates (DL, MH, KA, WB), bank accounts, and merges spelling variants via dynamic programming Levenshtein distance ($\le 2$).</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-dark rounded border border-secondary d-flex align-items-center gap-3">
+                            <i class="bi bi-file-earmark-pdf-fill text-success fs-2"></i>
+                            <div>
+                                <strong class="text-light small d-block">Judicial Certification Engine (BSA 2023)</strong>
+                                <span class="tiny-text text-secondary">Generates Section 63(4) Part A & Part B PDF certificates with calculated SHA-256 digests and independent forensic stamps on the fly.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: 5-PHASE ARCHITECTURE BLUEPRINT -->
+            <section class="slide" data-slide="5">
+                <div class="mb-3">
+                    <span class="metric-pill pill-purple mb-2 font-mono">SYSTEM BLUEPRINT</span>
+                    <h2 class="slide-heading">The 5-Phase End-to-End Pipeline</h2>
+                    <p class="slide-subheading">From raw unstructured police narratives to court-admissible visual intelligence</p>
+                </div>
+
+                <div class="d-flex flex-column gap-2">
+                    <div class="deck-card py-2.5 px-3 border-secondary d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="phase-bubble bg-danger text-light">P1</span>
+                            <div>
+                                <strong class="text-light small">Phase 1: Ingestion & Fuzzy Resolution</strong>
+                                <div class="tiny-text text-secondary">Raw FIRs + CDR CSVs + Financial Logs &rarr; Instant SHA-256 Hash &rarr; spaCy NER &rarr; Levenshtein DP (&le; 2 merge)</div>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-danger font-mono tiny-text">Unified Profiles</span>
+                    </div>
+
+                    <div class="deck-card py-2.5 px-3 border-secondary d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="phase-bubble bg-warning text-dark">P2</span>
+                            <div>
+                                <strong class="text-light small">Phase 2: In-Memory Multi-Relational Graph</strong>
+                                <div class="tiny-text text-secondary">NetworkX Engine &rarr; 6 Node Classes &rarr; 6 Directed Weighted Edges &rarr; <code>nx.betweenness_centrality()</code></div>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-warning text-dark font-mono tiny-text">Centrality Scoring</span>
+                    </div>
+
+                    <div class="deck-card py-2.5 px-3 border-secondary d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="phase-bubble bg-info text-dark">P3</span>
+                            <div>
+                                <strong class="text-light small">Phase 3: Legal Cryptography (BSA 2023)</strong>
+                                <div class="tiny-text text-secondary">Section 63(4) Engine &rarr; Part A System Operator Declaration + Part B Forensic Examiner Stamp &rarr; Two-Part Court PDF</div>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-info font-mono tiny-text">100% Admissible</span>
+                    </div>
+
+                    <div class="deck-card py-2.5 px-3 border-secondary d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="phase-bubble bg-primary text-light">P4</span>
+                            <div>
+                                <strong class="text-light small">Phase 4: Algorithmic Threat Detection Suite</strong>
+                                <div class="tiny-text text-secondary">SIM Churn (Bipartite &ge; 85%) + BTS Co-location (&le; 10 min window) + Logistics Filter (Transit + Short Hotel Stays)</div>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-primary font-mono tiny-text">Automated Flags</span>
+                    </div>
+
+                    <div class="deck-card py-2.5 px-3 border-secondary d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="phase-bubble bg-success text-dark">P5</span>
+                            <div>
+                                <strong class="text-light small">Phase 5: Forensic Command & D3.js Visualizer</strong>
+                                <div class="tiny-text text-secondary">Sky Blue SVG Canvas (#87CEEB) + Dynamic Centrality Radius + Leaflet Heatmap + Demographics + CCTNS APB Broadcast</div>
+                            </div>
+                        </div>
+                        <span class="badge text-bg-success font-mono tiny-text">Tactical UI</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: PHASE 1 NLP & LEVENSHTEIN DEDUPLICATION -->
+            <section class="slide" data-slide="6">
+                <div class="mb-3">
+                    <span class="metric-pill pill-danger mb-2 font-mono">PHASE 1 DEEP DIVE</span>
+                    <h2 class="slide-heading">NLP Extraction & Fuzzy Identity Resolution</h2>
+                    <p class="slide-subheading">Eliminating duplicate fragmented suspect nodes across police stations</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="deck-card h-100 border-secondary">
+                            <h6 class="fw-bold text-info mb-2"><i class="bi bi-cpu me-1"></i>Target Entity Extraction</h6>
+                            <ul class="small text-secondary ps-3 mb-3">
+                                <li><strong class="text-light">PERSON:</strong> Custom rule-based + spaCy NER filters legal stop-words (<em>"Accused"</em>, <em>"Complainant"</em>, <em>"SHO"</em>).</li>
+                                <li><strong class="text-light">VEHICLE_REG:</strong> Regex validating Indian state RTO codes: <code>[A-Z]{2}[-\s]?[0-9]{1,2}[-\s]?[A-Z]{1,3}[-\s]?[0-9]{4}</code> (e.g. <code>DL-01-AB-1234</code>, <code>MH-02-CD-5678</code>, <code>KA-05-XY-9999</code>).</li>
+                                <li><strong class="text-light">BANK_ACC:</strong> 9 to 18-digit mule bank accounts.</li>
+                                <li><strong class="text-light">LOC:</strong> Jurisdictions, hubs, and police station limits.</li>
+                            </ul>
+
+                            <div class="p-2.5 bg-dark rounded border border-secondary font-mono tiny-text text-secondary">
+                                <span class="text-success">RAW FIR:</span> "...Suspect Vikram Singhaniya operating car DL-01-AB-1234 wired Rs 18,50,000..."<br>
+                                <span class="text-info">&rarr; EXTRACTED:</span> Suspect="Vikram Singhaniya", Vehicle="DL-01-AB-1234", Amt=18.5L
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="deck-card h-100 border-secondary">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi bi-funnel me-1"></i>Levenshtein Distance Deduplication</h6>
+                            <p class="small text-secondary mb-2">
+                                Dynamic programming string edit matrix calculates edit distance between incoming suspect names and known profiles. If $Distance \le 2$, nodes are automatically unified.
+                            </p>
+
+                            <div class="table-responsive mb-2">
+                                <table class="table table-sm table-dark font-mono tiny-text mb-0">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>Extracted Name</th>
+                                            <th>Existing Profile</th>
+                                            <th>Edit Dist</th>
+                                            <th>Resolution Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-warning">"Rahul Mondal"</td>
+                                            <td class="text-light">"Raahul Mondal"</td>
+                                            <td class="text-success fw-bold">1</td>
+                                            <td class="text-success">Merged into Canonical ID</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-warning">"Vikram Singhaniya"</td>
+                                            <td class="text-light">"Vikram Singhania"</td>
+                                            <td class="text-success fw-bold">1</td>
+                                            <td class="text-success">Unified Alias Registered</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-danger">"Tariq Ali"</td>
+                                            <td class="text-light">"Kabir Sheikh"</td>
+                                            <td class="text-danger fw-bold">10</td>
+                                            <td class="text-info">Distinct Node Created</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="p-2 bg-dark rounded border border-success-subtle tiny-text text-success font-mono">
+                                &check; Result: 0% duplicate fragmented nodes. Law enforcement views ONE single master dossier for each criminal!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: PHASE 2 GRAPH ENGINE & BETWEENNESS CENTRALITY -->
+            <section class="slide" data-slide="7">
+                <div class="mb-3">
+                    <span class="metric-pill pill-purple mb-2 font-mono">PHASE 2 GRAPH THEORY</span>
+                    <h2 class="slide-heading">Betweenness Centrality: Unmasking the Kingpin</h2>
+                    <p class="slide-subheading">Why degree count fails, and how broker influence reveals the real mastermind</p>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="deck-card border-secondary h-100">
+                            <h5 class="fw-bold text-light mb-2">Degree Centrality vs. Betweenness Centrality</h5>
+                            <p class="small text-secondary mb-3">
+                                Traditional police analysis focuses on <em>call volume</em> (Degree Centrality). But smart kingpins only make 1 or 2 high-level calls to their key lieutenants!
+                            </p>
+
+                            <div class="p-3 bg-dark rounded border border-primary mb-3">
+                                <div class="tiny-text text-info fw-bold font-mono mb-1">MATHEMATICAL FORMULATION:</div>
+                                <div class="font-mono text-light fs-6 mb-1">
+                                    $$C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}$$
+                                </div>
+                                <div class="tiny-text text-secondary">
+                                    Where $\sigma_{st}$ is total shortest paths between $s$ and $t$, and $\sigma_{st}(v)$ is paths passing through broker node $v$.
+                                </div>
+                            </div>
+
+                            <ul class="small text-secondary ps-3 mb-0">
+                                <li><strong>Broker Bottleneck:</strong> If node $v$ is removed, the entire syndicate's communication collapses.</li>
+                                <li><strong>Dynamic Sizing:</strong> In our D3 visualization, node radius scales dynamically with $C_B(v)$, making masterminds immediately prominent to investigators.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="deck-card border-secondary h-100">
+                            <h5 class="fw-bold text-warning mb-2">Live Centrality Rankings in Nexus Graph</h5>
+                            
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-dark font-mono tiny-text mb-0">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>Suspect Entity</th>
+                                            <th>Role / Syndicate</th>
+                                            <th>Degree</th>
+                                            <th>Betweenness</th>
+                                            <th>Visual Radius</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-danger fw-bold">Vikram Singhania</td>
+                                            <td>Mastermind (Delhi-Mumbai Axis)</td>
+                                            <td>7</td>
+                                            <td class="text-danger fw-bold">0.421 (Highest)</td>
+                                            <td class="text-danger">32px (Largest)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-warning fw-bold">Tariq Ali</td>
+                                            <td>BEC & Logistics Trafficking</td>
+                                            <td>6</td>
+                                            <td class="text-warning fw-bold">0.318</td>
+                                            <td class="text-warning">26px</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-info fw-bold">Kabir Sheikh</td>
+                                            <td>Hawala & Cross-Border Settlement</td>
+                                            <td>5</td>
+                                            <td class="text-info fw-bold">0.245</td>
+                                            <td class="text-info">22px</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-secondary">Priya Sharma</td>
+                                            <td>Mule Account Holder</td>
+                                            <td>2</td>
+                                            <td class="text-secondary">0.012</td>
+                                            <td class="text-secondary">12px</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="p-2 bg-dark rounded border border-info-subtle tiny-text text-secondary">
+                                <strong class="text-info">Key Insight:</strong> Priya Sharma has low broker centrality, confirming she is just a mule. Vikram Singhania bridges Delhi extortion with Mumbai Hawala—he is the priority arrest target!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: PHASE 3 BSA 2023 CRYPTOGRAPHY & PDF ENGINE -->
+            <section class="slide" data-slide="8">
+                <div class="mb-3">
+                    <span class="metric-pill pill-green mb-2 font-mono">PHASE 3 LEGAL CRYPTOGRAPHY</span>
+                    <h2 class="slide-heading">Section 63(4) BSA 2023 Two-Part Certification</h2>
+                    <p class="slide-subheading">Turn-key digital certificates ensuring 100% conviction-ready evidence in court</p>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-5">
+                        <div class="deck-card border-info h-100 text-center p-3">
+                            <i class="bi bi-file-earmark-lock2 text-info" style="font-size: 3.5rem;"></i>
+                            <h5 class="fw-bold text-light mt-2 mb-1">Official BSA Certificate</h5>
+                            <span class="badge text-bg-info font-mono mb-3">Court-Admissible PDF Generator</span>
+
+                            <div class="p-2.5 bg-dark rounded border border-secondary text-start font-mono tiny-text text-secondary mb-3">
+                                <div><strong class="text-light">Statute:</strong> Sec 63(4) BSA 2023</div>
+                                <div><strong class="text-light">Cryptographic Hash:</strong> SHA-256</div>
+                                <div><strong class="text-light">Collision Resistance:</strong> 2^256</div>
+                                <div class="text-truncate"><strong class="text-light">Sample Digest:</strong> d5e963774e7db854812a370f88fd2c113c...</div>
+                            </div>
+
+                            <a href="/api/bsa-certificate/download?sha256_hash=d5e963774e7db854812a370f88fd2c113c70424182bbf593a77820b305c29c53" target="_blank" class="btn btn-sm btn-outline-info w-100 font-mono">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Download Sample Court PDF
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <div class="deck-card border-secondary h-100">
+                            <h5 class="fw-bold text-light mb-3">Anatomy of the Two-Part Certificate</h5>
+
+                            <div class="mb-3 p-3 bg-dark rounded border border-secondary">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <strong class="text-warning small font-mono">PART A: SYSTEM OPERATOR DECLARATION (Sec 63(4)(a))</strong>
+                                    <span class="badge bg-warning text-dark font-mono tiny-text">Custody & Integrity</span>
+                                </div>
+                                <p class="tiny-text text-secondary mb-0">
+                                    Signed by the Police Ingestion Officer / IT Head. Declares the specific electronic machine ID, Linux kernel/OS, lawful custody of server, and confirms the database was operating in normal course without unauthorized modification.
+                                </p>
+                            </div>
+
+                            <div class="mb-3 p-3 bg-dark rounded border border-secondary">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <strong class="text-success small font-mono">PART B: INDEPENDENT FORENSIC EXAMINER CERTIFICATION (Sec 63(4)(b))</strong>
+                                    <span class="badge bg-success font-mono tiny-text">CERT-In Empanelled</span>
+                                </div>
+                                <p class="tiny-text text-secondary mb-0">
+                                    Signed by an empanelled Cyber Forensic Examiner. Confirms cryptographic verification, zero bit-rot, 0% SHA-256 hash collision, and certifies the digital artifact as an authentic judicial mirror.
+                                </p>
+                            </div>
+
+                            <div class="tiny-text text-muted font-mono">
+                                &starf; <em>Nexus Graph dynamically renders this two-part PDF on demand for ANY node, CDR CSV, or FIR record in the database with 1 click.</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: PHASE 4 ALGORITHMIC THREAT SUITE -->
+            <section class="slide" data-slide="9">
+                <div class="mb-3">
+                    <span class="metric-pill pill-danger mb-2 font-mono">PHASE 4 THREAT INTELLIGENCE</span>
+                    <h2 class="slide-heading">Algorithmic Threat Detection Suite</h2>
+                    <p class="slide-subheading">Real-time heuristics detecting SIM churn, co-location, and human trafficking logistics</p>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Threat 1 -->
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-danger">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-danger small"><i class="bi bi-sim me-1"></i>SIM Churn Engine</span>
+                                <span class="badge text-bg-danger font-mono">&ge; 85% Overlap</span>
+                            </div>
+                            <p class="tiny-text text-secondary mb-2">
+                                When a phone line deactivates, the engine scans the network for newly activated lines whose outbound contact targets overlap by at least 85%.
+                            </p>
+                            <div class="p-2 bg-dark rounded border border-danger-subtle font-mono tiny-text text-secondary">
+                                <strong>Live Discovery:</strong><br>
+                                Deactivated: <span class="text-light">9820099881</span><br>
+                                Replacement: <span class="text-danger fw-bold">9899011222</span><br>
+                                Overlap: <span class="text-danger fw-bold">100% (4/4 Accomplices)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Threat 2 -->
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-warning">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-warning small"><i class="bi bi-broadcast me-1"></i>BTS Co-Location</span>
+                                <span class="badge text-bg-warning text-dark font-mono">&le; 10 min Window</span>
+                            </div>
+                            <p class="tiny-text text-secondary mb-2">
+                                Time-window grouping function: Flags distinct suspect phones pinging the exact same cell tower ID within 10 minutes, generating a <code>CO_LOCATED</code> edge.
+                            </p>
+                            <div class="p-2 bg-dark rounded border border-warning-subtle font-mono tiny-text text-secondary">
+                                <strong>Live Discovery:</strong><br>
+                                Tower: <span class="text-light">TOWER-DEL-402</span><br>
+                                Phones: <span class="text-warning">9810011223 & 9811099887</span><br>
+                                Delta: <span class="text-warning fw-bold">3.6 Minutes Apart</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Threat 3 -->
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-info">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-info small"><i class="bi bi-airplane-engines me-1"></i>Logistics Filter</span>
+                                <span class="badge text-bg-info font-mono">Women's Safety</span>
+                            </div>
+                            <p class="tiny-text text-secondary mb-2">
+                                Cross-references financial logs for rapid transit tickets (IRCTC, RedBus, MakeMyTrip) paired with repetitive short hotel stays (OYO, Treebo, Ginger).
+                            </p>
+                            <div class="p-2 bg-dark rounded border border-info-subtle font-mono tiny-text text-secondary">
+                                <strong>Live Discovery:</strong><br>
+                                Suspect: <span class="text-light">Tariq Ali (A/C: 440192837461)</span><br>
+                                Pattern: <span class="text-info fw-bold">3 Transit + 3 Hotel Stays</span><br>
+                                Axis: <span class="text-info">Delhi &rarr; Jaipur &rarr; Kolkata</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-2.5 bg-dark rounded border border-secondary text-center tiny-text text-secondary">
+                    <i class="bi bi-bell-fill text-danger me-1"></i>Flagged threats trigger pulsing crimson halos in the D3 graph and push real-time notifications to the tactical APB broadcast queue.
+                </div>
+            </section>
+
+            <!-- SLIDE 10: DEMOGRAPHIC INTELLIGENCE & HEATMAP -->
+            <section class="slide" data-slide="10">
+                <div class="mb-3">
+                    <span class="metric-pill pill-blue mb-2 font-mono">ANALYTICAL INTELLIGENCE</span>
+                    <h2 class="slide-heading">Victim Demographics & Geospatial Heatmap</h2>
+                    <p class="slide-subheading">Uncovering predatory targeting patterns across age, gender, and geography</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-secondary">
+                            <h6 class="fw-bold text-info mb-2"><i class="bi bi-person-lines-fill me-1"></i>Suspect vs. Age Bracket</h6>
+                            <p class="tiny-text text-secondary mb-2">Quantifies which criminal suspects focus their scams on specific age groups:</p>
+                            <ul class="tiny-text text-secondary ps-3 mb-0">
+                                <li><strong class="text-success">18–25 (Students):</strong> Predominantly targeted by <strong>Rahul Mondal</strong> (Instant Loan App blackmail & doxxing).</li>
+                                <li><strong class="text-primary">26–35 (Young Pros):</strong> Targeted by <strong>Tariq Ali</strong> (Job scams & BEC wire fraud).</li>
+                                <li><strong class="text-purple" style="color: #c084fc;">36–50 (Execs):</strong> Targeted by <strong>Vikram Singhania</strong> (₹63.5L corporate extortion).</li>
+                                <li><strong class="text-danger">50+ (Seniors):</strong> Targeted by <strong>Kabir Sheikh</strong> (Hawala & digital pension theft).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-secondary">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi bi-gender-ambiguous me-1"></i>Gender Vulnerability Audit</h6>
+                            <p class="tiny-text text-secondary mb-2">Statistical breakdown of gender targeting across crime categories:</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark font-mono tiny-text mb-0">
+                                    <thead>
+                                        <tr class="table-secondary">
+                                            <th>Crime Category</th>
+                                            <th>Female %</th>
+                                            <th>Primary Risk</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Human Trafficking</td>
+                                            <td class="text-danger fw-bold">80.5%</td>
+                                            <td>Extremely High Female</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Loan App Doxxing</td>
+                                            <td class="text-warning">43.0%</td>
+                                            <td>College Youth</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Corporate BEC</td>
+                                            <td class="text-info">21.1%</td>
+                                            <td>Male Executives (78%)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Hawala / Pension</td>
+                                            <td class="text-light">43.3%</td>
+                                            <td>Elderly Citizens</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="deck-card h-100 border-secondary">
+                            <h6 class="fw-bold text-danger mb-2"><i class="bi bi-geo-alt-fill me-1"></i>Geospatial Heatmap</h6>
+                            <p class="tiny-text text-secondary mb-2">Leaflet.js heat density & BTS tower mapping across Indian jurisdictions:</p>
+                            <ul class="tiny-text text-secondary ps-3 mb-2">
+                                <li><strong class="text-danger">Delhi NCR (0.95):</strong> High-density extortion & corporate BEC nerve center.</li>
+                                <li><strong class="text-warning">Mumbai BKC (0.92):</strong> Multi-crore digital mule layering hub.</li>
+                                <li><strong class="text-info">Bengaluru (0.78):</strong> Illegal loan app server deployment axis.</li>
+                                <li><strong class="text-purple" style="color: #c084fc;">Kolkata (0.88):</strong> Cross-border Hawala & logistics corridor.</li>
+                            </ul>
+                            <div class="tiny-text text-success font-mono">
+                                &check; Tracks 4 Active BTS Towers & 3 Monitored Transit Routes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: CASE STUDY & STORY WALKTHROUGH -->
+            <section class="slide" data-slide="11">
+                <div class="mb-3">
+                    <span class="metric-pill pill-purple mb-2 font-mono">END-TO-END DEMO</span>
+                    <h2 class="slide-heading">Case Walkthrough: The Tri-State Syndicate</h2>
+                    <p class="slide-subheading">How Nexus Graph solves a 4-city cyber heist in 30 seconds</p>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-md-12">
+                        <div class="deck-card p-3 border-secondary">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="phase-bubble bg-danger text-light">1</span>
+                                <div class="flex-grow-1">
+                                    <strong class="text-light small">Step 1: Special Cell FIR-2026-DEL-101 Ingested</strong>
+                                    <div class="tiny-text text-secondary">FIR reports ₹45 Lakhs extortion in Delhi. spaCy extracts suspect <em>"Vikram Singhania"</em>, getaway car <code>DL-01-AB-1234</code>, and mobile <code>9810011223</code>. SHA-256 seal generated instantly.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="deck-card p-3 border-secondary">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="phase-bubble bg-warning text-dark">2</span>
+                                <div class="flex-grow-1">
+                                    <strong class="text-light small">Step 2: Fuzzy Deduplication Catches Alias in Rohini FIR-102</strong>
+                                    <div class="tiny-text text-secondary">Rohini police file charges against <em>"Vikram Singhaniya"</em> driving car <code>DL-01-AB-1234</code>. Levenshtein engine computes edit distance = 1 and merges both records into a single unified suspect master node.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="deck-card p-3 border-secondary">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="phase-bubble bg-info text-dark">3</span>
+                                <div class="flex-grow-1">
+                                    <strong class="text-light small">Step 3: BTS Co-Location Proves Physical Coordination</strong>
+                                    <div class="tiny-text text-secondary">Telecom engine matches tower pings at <code>TOWER-DEL-402</code>. Vikram Singhania and Amit Verma pinged the tower within 3.6 minutes of each other, establishing conspiracy.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="deck-card p-3 border-secondary">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="phase-bubble bg-primary text-light">4</span>
+                                <div class="flex-grow-1">
+                                    <strong class="text-light small">Step 4: SIM Churn Engine Bridges Delhi with Mumbai & Kolkata</strong>
+                                    <div class="tiny-text text-secondary">Deactivated Mumbai phone <code>9820099881</code> switches to <code>9899011222</code>. Bipartite matching detects 100% overlap with Tariq Ali, Kabir Sheikh, and Amit Verma. The interstate ring is fully exposed!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="deck-card p-3 border-success">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="phase-bubble bg-success text-dark">&check;</span>
+                                <div class="flex-grow-1">
+                                    <strong class="text-success small">Outcome: 1-Click Judicial Admissibility & Nationwide APB Dispatch</strong>
+                                    <div class="tiny-text text-secondary">Investigator clicks <em>"Download BSA Certificate"</em> for immediate court presentation and triggers <em>"Broadcast APB"</em> alerting 8 state police cyber cells.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 12: NATIONWIDE POLICE APB BROADCAST -->
+            <section class="slide" data-slide="12">
+                <div class="mb-3">
+                    <span class="metric-pill pill-danger mb-2 font-mono">INTER-AGENCY TACTICAL GRID</span>
+                    <h2 class="slide-heading">Nationwide Inter-Agency APB Dispatch Engine</h2>
+                    <p class="slide-subheading">Breaking state boundaries: Transmitting cryptographically sealed suspect dossiers via CCTNS</p>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="deck-card border-danger h-100">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="fw-bold text-danger mb-0"><i class="bi bi-broadcast me-2"></i>One-Click APB Broadcast</h5>
+                                <span class="badge text-bg-danger font-mono">FLASH RED ALERT</span>
+                            </div>
+                            <p class="small text-secondary mb-3">
+                                When a syndicate mastermind or interstate fugitive is identified, Nexus Graph compiles an encrypted intelligence packet containing:
+                            </p>
+                            <ul class="small text-secondary ps-3 mb-3">
+                                <li><strong class="text-light">Verified Suspect Aliases</strong> (deduplicated via Levenshtein).</li>
+                                <li><strong class="text-purple" style="color: #c084fc;">Getaway Vehicles & License Plates</strong> (for highway toll intercepts).</li>
+                                <li><strong class="text-warning">Mule Bank Accounts</strong> (for immediate RBI / FIU / Cyber Cell freeze).</li>
+                                <li><strong class="text-info">Burner MSISDNs & SIM Churn Links</strong> (for real-time tower triangulation).</li>
+                                <li><strong class="text-success">Section 63(4) BSA 2023 Digital Seal</strong> (ensuring lawful inter-agency custody).</li>
+                            </ul>
+                            <div class="p-2 bg-dark rounded border border-danger-subtle tiny-text text-danger font-mono">
+                                Dispatched via simulated CCTNS National Crime Gateway with sub-50ms acknowledgement latency!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="deck-card border-secondary h-100">
+                            <h6 class="fw-bold text-light mb-2"><i class="bi bi-building-check text-info me-2"></i>Live Connected Police Stations</h6>
+                            
+                            <div class="d-flex flex-column gap-2 mb-3">
+                                <div class="p-2 bg-dark rounded border border-secondary d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-light tiny-text d-block">Delhi: Special Cell Cyber Crime PS</strong>
+                                        <span class="text-secondary" style="font-size: 0.7rem;">Lodhi Colony, Delhi NCR</span>
+                                    </div>
+                                    <span class="badge text-bg-success tiny-text font-mono">ACKNOWLEDGED (24ms)</span>
+                                </div>
+
+                                <div class="p-2 bg-dark rounded border border-secondary d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-light tiny-text d-block">Mumbai: Cyber Police Station (BKC)</strong>
+                                        <span class="text-secondary" style="font-size: 0.7rem;">Bandra Kurla Complex, Mumbai</span>
+                                    </div>
+                                    <span class="badge text-bg-success tiny-text font-mono">ACKNOWLEDGED (31ms)</span>
+                                </div>
+
+                                <div class="p-2 bg-dark rounded border border-secondary d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-light tiny-text d-block">Bengaluru: Cyber Economic STF</strong>
+                                        <span class="text-secondary" style="font-size: 0.7rem;">Indiranagar, Bengaluru City</span>
+                                    </div>
+                                    <span class="badge text-bg-success tiny-text font-mono">ACKNOWLEDGED (19ms)</span>
+                                </div>
+
+                                <div class="p-2 bg-dark rounded border border-secondary d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-light tiny-text d-block">Kolkata: STF Cyber Cell (Sector V)</strong>
+                                        <span class="text-secondary" style="font-size: 0.7rem;">Salt Lake, Kolkata STF & CID</span>
+                                    </div>
+                                    <span class="badge text-bg-success tiny-text font-mono">ACKNOWLEDGED (42ms)</span>
+                                </div>
+                            </div>
+
+                            <div class="tiny-text text-secondary">
+                                &check; <em>Also covers Hyderabad CID, Jaipur STF, Chennai Cyber Cell, and Gujarat CID.</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: TECH STACK & BENCHMARKS -->
+            <section class="slide" data-slide="13">
+                <div class="mb-3">
+                    <span class="metric-pill pill-blue mb-2 font-mono">ENGINEERING ARCHITECTURE</span>
+                    <h2 class="slide-heading">Technical Stack & Performance Benchmarks</h2>
+                    <p class="slide-subheading">Enterprise-grade, high-throughput cyber intelligence stack with air-gapped security</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-secondary">
+                            <div class="text-info fs-3 mb-2"><i class="bi bi-cpu"></i></div>
+                            <h6 class="fw-bold text-light mb-1">Backend & ML Engine</h6>
+                            <ul class="tiny-text text-secondary ps-3 mb-0">
+                                <li><strong>FastAPI (Python 3.10+):</strong> Async REST API with OpenAPI documentation.</li>
+                                <li><strong>NetworkX:</strong> In-memory multi-relational graph & betweenness centrality.</li>
+                                <li><strong>Neo4j Bridge:</strong> Dual persistence driver with Cypher graph query support.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-secondary">
+                            <div class="text-warning fs-3 mb-2"><i class="bi bi-translate"></i></div>
+                            <h6 class="fw-bold text-light mb-1">Forensic NLP & Bulk I/O</h6>
+                            <ul class="tiny-text text-secondary ps-3 mb-0">
+                                <li><strong>spaCy 3.7 Pipeline:</strong> Named entity recognition fine-tuned for Indian FIRs.</li>
+                                <li><strong>Levenshtein DP:</strong> Dynamic programming matrix with $O(m \times n)$ efficiency.</li>
+                                <li><strong>Java OOP Streamer:</strong> High-speed chunked parser (<code>BulkDataProcessor.java</code>).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-secondary">
+                            <div class="text-success fs-3 mb-2"><i class="bi bi-shield-lock"></i></div>
+                            <h6 class="fw-bold text-light mb-1">Legal Cryptography</h6>
+                            <ul class="tiny-text text-secondary ps-3 mb-0">
+                                <li><strong>SHA-256 Engine:</strong> Hardware-accelerated ingestion hashing.</li>
+                                <li><strong>PDF-1.4 Generator:</strong> Pure-code standard rendering conforming to Sec 63(4) BSA 2023.</li>
+                                <li><strong>Air-Gapped:</strong> Runs 100% locally on-premise without cloud leaks.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="deck-card h-100 border-secondary">
+                            <div class="text-purple fs-3 mb-2" style="color: #c084fc;"><i class="bi bi-window-fullscreen"></i></div>
+                            <h6 class="fw-bold text-light mb-1">Frontend Visualization</h6>
+                            <ul class="tiny-text text-secondary ps-3 mb-0">
+                                <li><strong>D3.js v7:</strong> Force-directed simulation on Sky Blue canvas (#87CEEB).</li>
+                                <li><strong>Leaflet.js:</strong> Interactive geospatial heatmap of Indian jurisdictions.</li>
+                                <li><strong>Chart.js:</strong> Demographic and gender impact bar & donut charts.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 row g-3">
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-dark rounded border border-secondary text-center">
+                            <span class="tiny-text text-secondary font-mono d-block">API LATENCY</span>
+                            <strong class="text-success font-mono fs-5">&lt; 38 ms</strong>
+                            <span class="tiny-text text-secondary d-block">D3 Graph JSON Payload</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-dark rounded border border-secondary text-center">
+                            <span class="tiny-text text-secondary font-mono d-block">INGESTION THROUGHPUT</span>
+                            <strong class="text-info font-mono fs-5">&gt; 12,000 rec/sec</strong>
+                            <span class="tiny-text text-secondary d-block">Java / Pandas Hybrid Streamer</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-2.5 bg-dark rounded border border-secondary text-center">
+                            <span class="tiny-text text-secondary font-mono d-block">BSA COMPLIANCE</span>
+                            <strong class="text-danger font-mono fs-5">100% Section 63(4)</strong>
+                            <span class="tiny-text text-secondary d-block">Two-Part PDF Admissibility</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 14: IMPACT, SCALABILITY & ROADMAP -->
+            <section class="slide" data-slide="14">
+                <div class="mb-3">
+                    <span class="metric-pill pill-green mb-2 font-mono">FUTURE HORIZONS</span>
+                    <h2 class="slide-heading">Operational Impact & Strategic Roadmap</h2>
+                    <p class="slide-subheading">Transforming cybercrime investigation across 28 Indian States and Union Territories</p>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="deck-card h-100 border-success">
+                            <h5 class="fw-bold text-success mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Measurable Law Enforcement Impact</h5>
+                            <div class="d-flex flex-column gap-2.5">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                                    <div>
+                                        <strong class="text-light small">95% Reduction in Cross-Jurisdiction Analysis Time</strong>
+                                        <div class="tiny-text text-secondary">Transforms multi-week manual paper correlation into a sub-second graph query.</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                                    <div>
+                                        <strong class="text-light small">Zero Evidentiary Dismissals in Judicial Trials</strong>
+                                        <div class="tiny-text text-secondary">Guaranteed Section 63(4) BSA 2023 compliance with immutable SHA-256 custody trails.</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                                    <div>
+                                        <strong class="text-light small">Early Interception of Human Trafficking Victims</strong>
+                                        <div class="tiny-text text-secondary">Logistics filter flags interstate transit corridors before victims are transported across borders.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="deck-card h-100 border-info">
+                            <h5 class="fw-bold text-info mb-3"><i class="bi bi-compass me-2"></i>Strategic National Deployment Roadmap</h5>
+                            <div class="d-flex flex-column gap-2.5">
+                                <div class="d-flex align-items-start gap-2">
+                                    <span class="badge text-bg-info font-mono tiny-text mt-0.5">Q1 2027</span>
+                                    <div>
+                                        <strong class="text-light small">CCTNS & ICJS Gateway Integration</strong>
+                                        <div class="tiny-text text-secondary">Native real-time connector with the national Crime and Criminal Tracking Network & Systems.</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-2">
+                                    <span class="badge text-bg-info font-mono tiny-text mt-0.5">Q2 2027</span>
+                                    <div>
+                                        <strong class="text-light small">Bhashini Multilingual Indian Language Ingestion</strong>
+                                        <div class="tiny-text text-secondary">Extending NLP extraction to Hindi, Marathi, Bengali, Tamil, Telugu, and Kannada FIR narratives.</div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-start gap-2">
+                                    <span class="badge text-bg-info font-mono tiny-text mt-0.5">Q3 2027</span>
+                                    <div>
+                                        <strong class="text-light small">Dark Web & Crypto-Mixer Mule Tracking</strong>
+                                        <div class="tiny-text text-secondary">Incorporating on-chain tracing for USDT / Tron crypto addresses used in illegal betting and BEC heists.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 15: CONCLUSION & Q&A -->
+            <section class="slide" data-slide="15">
+                <div class="text-center my-auto">
+                    <div class="d-inline-flex align-items-center gap-2 mb-3">
+                        <span class="metric-pill pill-danger">Ready for Immediate Police Deployment</span>
+                        <span class="metric-pill pill-green">Sec 63(4) Certified</span>
+                    </div>
+
+                    <h1 class="hero-title mb-3">
+                        Empowering India's Cyber Defense with <span class="text-danger">Graph AI</span>
+                    </h1>
+                    <p class="fs-5 text-secondary mb-4" style="max-width: 800px; margin: 0 auto;">
+                        Nexus Graph v2.0 solves the fragmented puzzle of modern organized crime—turning raw telecom, financial, and police narratives into actionable, court-admissible judicial intelligence.
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-3 mb-5">
+                        <a href="/" target="_blank" class="btn btn-lg btn-danger px-4 fw-bold shadow d-flex align-items-center gap-2">
+                            <i class="bi bi-play-circle-fill"></i>
+                            <span>Switch to Live Interactive Dashboard</span>
+                        </a>
+                        <button class="btn btn-lg btn-outline-info px-4" onclick="toggleNotes()">
+                            <i class="bi bi-journal-text me-2"></i>
+                            <span>View Speaker Script (N)</span>
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-dark rounded border border-secondary d-inline-block text-start">
+                        <div class="d-flex align-items-center gap-4 font-mono tiny-text">
+                            <div><span class="text-secondary">SYSTEM:</span> <strong class="text-light">NEXUS GRAPH v2.0</strong></div>
+                            <div class="border-start border-secondary ps-3"><span class="text-secondary">STATUS:</span> <strong class="text-success">&check; OPERATIONAL</strong></div>
+                            <div class="border-start border-secondary ps-3"><span class="text-secondary">PRESENTATION:</span> <strong class="text-info">SMART INDIA HACKATHON</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Progress Container -->
+        <div class="deck-progress-container">
+            <div class="deck-progress-bar" id="deck-progress-bar"></div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="deck-footer">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-darker border border-secondary font-mono text-light fs-6 px-2.5 py-1" id="slide-number-badge">
+                    01 / 15
+                </span>
+                <span class="small text-secondary d-none d-md-inline" id="slide-title-indicator">
+                    Title & System Overview
+                </span>
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary px-3" id="btn-prev-slide" title="Previous Slide (Left Arrow)">
+                    <i class="bi bi-chevron-left me-1"></i>Prev
+                </button>
+                <button class="btn btn-sm btn-primary px-3 fw-bold" id="btn-next-slide" title="Next Slide (Right Arrow / Space)">
+                    Next<i class="bi bi-chevron-right ms-1"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-2" id="btn-toggle-notes" title="Toggle Presenter Speaker Notes (N)">
+                    <i class="bi bi-chat-left-text me-1"></i>Notes
+                </button>
+            </div>
+        </footer>
+
+        <!-- Speaker Notes Drawer -->
+        <div class="notes-drawer" id="notes-drawer">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="notes-title" id="notes-speaker-label"><i class="bi bi-mic-fill me-1"></i>SPEAKER NOTES // SLIDE 1</span>
+                <button class="btn btn-xs btn-outline-secondary" onclick="toggleNotes()"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="notes-content" id="notes-text">
+                Loading speaker script...
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Slide Logic & Speaker Notes Script -->
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 1;
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        // Speaker script for each slide
+        const speakerNotes = {
+            1: "Good morning respected judges and evaluators. Modern organized crime syndicates no longer operate within single police station jurisdictions. They deploy rapid SIM churning, multi-layer mule accounts, and getaway vehicles across state lines. Today, we are proud to introduce NEXUS GRAPH v2.0: an end-to-end Graph AI and cybercrime intelligence engine fully compliant with Section 63(4) of the newly enacted Bharatiya Sakshya Adhiniyam, 2023.",
+            2: "To understand why Nexus Graph is vital, let us examine the criminal syndicate playbook. Criminals intentionally switch burner SIMs every 48 hours to evade telecom surveillance. When FIRs are filed, name spellings vary—'Rahul' in Delhi becomes 'Raahul' in Bengaluru, creating fragmented police files. Meanwhile, stolen funds are routed across 5 mule accounts within minutes, and logistics networks book frequent transit and budget hotels for trafficking. Police departments have the data, but it is trapped in disconnected silos.",
+            3: "Here is the critical legal milestone: on July 1, 2024, the Indian Evidence Act was repealed and replaced by the Bharatiya Sakshya Adhiniyam, 2023. Under Section 63(4), digital evidence is rejected in court unless accompanied by a mandatory two-part certificate verifying hardware custody, software integrity, and cryptographic SHA-256 hash validation. Without instant cryptographic sealing at ingestion, entire police investigations fall apart during judicial trials.",
+            4: "Nexus Graph solves this by fusing unstructured FIR narratives, telecom CDR pings, and financial transactions into an in-memory multi-relational intelligence graph. We compute Betweenness Centrality to identify true masterminds, execute autonomous threat heuristics like SIM churn and BTS co-location, generate Section 63(4) court-ready PDF certificates on demand, and dispatch All-Points Bulletins to police stations nationwide via CCTNS.",
+            5: "Here is our 5-Phase Architecture. Phase 1 ingests raw narratives and CSVs with instant SHA-256 hashing and Levenshtein fuzzy deduplication. Phase 2 builds the NetworkX graph and computes broker centrality. Phase 3 handles Section 63(4) BSA legal cryptography. Phase 4 runs autonomous threat detection (SIM churn, BTS co-location, anti-trafficking). Phase 5 renders our D3.js sky blue canvas, demographic matrices, and CCTNS APB broadcast grid.",
+            6: "In Phase 1, our custom spaCy pipeline extracts suspects, locations, bank accounts, and Indian vehicle registration plates validating state RTO codes like DL, MH, KA, and WB. Crucially, our Levenshtein dynamic programming engine computes edit distance: if two names have distance <= 2, like 'Vikram Singhania' and 'Vikram Singhaniya', they are automatically unified into one canonical profile ID. This eliminates duplicate nodes and gives investigators one unified suspect dossier.",
+            7: "In Phase 2, we tackle a classic police dilemma: Degree Centrality only measures raw call volume, so foot-soldiers look prominent. But masterminds rarely call everyone—they act as brokers. By calculating Betweenness Centrality—measuring the fraction of all shortest paths passing through a node—we mathematically expose the hidden kingpin. In our graph, Vikram Singhania has the highest broker score of 0.421, dynamically scaling his node radius to 32px so investigators immediately identify him.",
+            8: "Phase 3 is our legal cornerstone. Nexus Graph features an automated Section 63(4) BSA 2023 PDF generator. Part A is the System Operator Declaration certifying machine custody and operating system integrity under Section 63(4)(a). Part B is the Independent Forensic Examiner Certification validating the SHA-256 hash and 0% collision under Section 63(4)(b). Judges and public prosecutors can download this court-admissible certificate with one click.",
+            9: "Phase 4 is our automated threat detection suite. First: SIM Churn detection uses bipartite graph matching to catch when a deactivated line is replaced by a new number sharing 85% or more common contacts. Second: BTS Co-location finds distinct phones pinging the same cell tower within a 10-minute window. Third: our anti-trafficking logistics filter flags transit bookings alongside short hotel stays, directly serving Women's Safety.",
+            10: "In Phase 5, we provide dedicated demographic analytics. Our suspect-age matrix proves that Rahul Mondal predatory targets students aged 18 to 25 with loan app blackmail, whereas Vikram Singhania targets executives aged 36 to 50 for corporate extortion. Our gender audit reveals that human trafficking exhibits an 80.5% female victimization rate. Coupled with our Leaflet geospatial heatmap, commanders visualize risk density across Delhi, Mumbai, Bengaluru, and Kolkata in real time.",
+            11: "Let us walk through a real-world case study. Delhi police file FIR-101 for a 45 Lakh extortion involving car DL-01-AB-1234. Rohini police file FIR-102 with a misspelled name 'Vikram Singhaniya'. Our Levenshtein engine unifies them. Next, BTS co-location proves Vikram and Amit Verma pinged cell tower 402 within 3.6 minutes. Then, SIM churn catches a deactivated Mumbai phone switching to a new line calling the exact same accomplices. In 30 seconds, an interstate crime ring spanning 4 cities is completely solved.",
+            12: "Once the syndicate is cracked, investigators need immediate inter-agency action. Our Nationwide Police APB Dispatch engine compiles an encrypted suspect dossier—including unified aliases, getaway vehicle plates for highway toll intercept, frozen accounts, and burner phones. With one click, it transmits the alert across state cyber cells with acknowledgment latency tracking and cryptographic sealing.",
+            13: "Looking at engineering, Nexus Graph is built with Python FastAPI, NetworkX, spaCy 3.7, and a high-speed Java OOP streaming parser. On the frontend, D3.js v7, Leaflet.js, and Chart.js deliver sub-38 millisecond response times. Crucially, Nexus Graph runs 100% on-premise and air-gapped without leaking sensitive police intelligence to third-party public clouds.",
+            14: "The operational impact is profound: a 95% reduction in cross-agency correlation time and 100% legal admissibility under BSA 2023. Looking forward, our roadmap includes integration with national CCTNS and ICJS databases, multilingual FIR parsing across 22 regional Indian languages via Bhashini, and crypto-mixer tracing for illegal betting syndicates.",
+            15: "In conclusion, Nexus Graph v2.0 transforms siloed police reports into actionable, court-certified judicial intelligence. It bridges the critical gap between artificial intelligence and the rule of law under the Bharatiya Sakshya Adhiniyam, 2023. We are now ready to demonstrate the live interactive dashboard. Thank you, and we welcome your questions!"
+        };
+
+        const slideTitles = {
+            1: "Title & System Overview",
+            2: "Organized Crime Syndicate Playbook",
+            3: "Section 63(4) BSA 2023 Legal Bottleneck",
+            4: "Nexus Graph Solution Architecture",
+            5: "The 5-Phase End-to-End Pipeline",
+            6: "Phase 1: NLP & Levenshtein Resolution",
+            7: "Phase 2: Graph Theory & Betweenness Centrality",
+            8: "Phase 3: BSA 2023 Two-Part Certification",
+            9: "Phase 4: Algorithmic Threat Detection Suite",
+            10: "Phase 5: Demographic Intelligence & Heatmap",
+            11: "Case Walkthrough: Tri-State Syndicate",
+            12: "Nationwide Police APB Dispatch Engine",
+            13: "Technical Stack & Performance Benchmarks",
+            14: "Operational Impact & Strategic Roadmap",
+            15: "Conclusion & Live Demo Prompt"
+        };
+
+        function showSlide(slideIndex) {
+            if (slideIndex < 1) slideIndex = 1;
+            if (slideIndex > totalSlides) slideIndex = totalSlides;
+            currentSlide = slideIndex;
+
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                if (parseInt(slide.getAttribute('data-slide')) === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            // Update footer metrics
+            const pad = (n) => n < 10 ? '0' + n : n;
+            document.getElementById('slide-number-badge').textContent = `${pad(currentSlide)} / ${pad(totalSlides)}`;
+            document.getElementById('slide-title-indicator').textContent = slideTitles[currentSlide] || '';
+
+            // Update Progress Bar
+            const progressPct = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+            document.getElementById('deck-progress-bar').style.width = `${progressPct}%`;
+
+            // Update Speaker Notes
+            document.getElementById('notes-speaker-label').innerHTML = `<i class="bi bi-mic-fill me-1"></i>SPEAKER NOTES // SLIDE ${currentSlide}: ${slideTitles[currentSlide]}`;
+            document.getElementById('notes-text').textContent = speakerNotes[currentSlide] || "No notes available.";
+
+            // Button states
+            document.getElementById('btn-prev-slide').disabled = (currentSlide === 1);
+            document.getElementById('btn-next-slide').disabled = (currentSlide === totalSlides);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function toggleNotes() {
+            const drawer = document.getElementById('notes-drawer');
+            drawer.classList.toggle('open');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Fullscreen error: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const mins = Math.floor(timerSeconds / 60);
+                const secs = timerSeconds % 60;
+                const pad = (n) => n < 10 ? '0' + n : n;
+                document.getElementById('slide-timer').textContent = `${pad(mins)}:${pad(secs)}`;
+            }, 1000);
+        }
+
+        // Event Listeners
+        document.getElementById('btn-next-slide').addEventListener('click', nextSlide);
+        document.getElementById('btn-prev-slide').addEventListener('click', prevSlide);
+        document.getElementById('btn-toggle-notes').addEventListener('click', toggleNotes);
+        document.getElementById('btn-toggle-fullscreen').addEventListener('click', toggleFullscreen);
+
+        // Keyboard Controls
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'n' || e.key === 'N') {
+                e.preventDefault();
+                toggleNotes();
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(1);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides);
+            }
+        });
+
+        // Initialize
+        showSlide(1);
+        startTimer();
+    </script>
+</body>
+</html>

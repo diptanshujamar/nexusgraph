@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS GRAPH // Crime, Telecom & Financial Threat Intelligence</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS for Geospatial Heatmap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-dark text-light">
+
+    <!-- Top Navigation Bar (Systematic, Uncluttered, Modern) -->
+    <header class="navbar navbar-expand-lg border-bottom border-secondary-subtle px-3 py-2 bg-darker sticky-top">
+        <div class="container-fluid px-0">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none me-3" href="#" onclick="switchView('graph')">
+                <div class="brand-icon d-flex align-items-center justify-content-center">
+                    <i class="bi bi-shield-shaded text-danger fs-4"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-light tracking-wide d-flex align-items-center gap-2">
+                        <span>NEXUS</span><span class="text-danger fw-extrabold">GRAPH</span>
+                        <span class="badge text-bg-danger-subtle text-danger border border-danger-subtle px-1.5 py-0.5 small-caps">v2.0 BSA</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Dedicated Multi-Tab Navigation (Every Graph in its Own Tab) -->
+            <nav class="nav nav-pills main-nav-pills gap-1 mx-auto my-1 my-lg-0" id="mainNavTabs">
+                <button class="nav-link active d-flex align-items-center gap-1.5" id="tab-btn-graph" onclick="switchView('graph')">
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <span>Syndicate Graph</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-age" onclick="switchView('age')">
+                    <i class="bi bi-person-lines-fill text-info"></i>
+                    <span>Age Group Impact</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-gender" onclick="switchView('gender')">
+                    <i class="bi bi-gender-ambiguous text-warning"></i>
+                    <span>Gender & Crime</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-heatmap" onclick="switchView('heatmap')">
+                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                    <span>Crime Heatmap</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-threats" onclick="switchView('threats')">
+                    <i class="bi bi-shield-exclamation text-warning"></i>
+                    <span>Threat Center</span>
+                    <span class="badge rounded-pill bg-danger ms-1" id="nav-threat-count">0</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-bsa" onclick="switchView('bsa')">
+                    <i class="bi bi-file-earmark-lock2-fill text-info"></i>
+                    <span>BSA 2023 Evidence</span>
+                </button>
+                <button class="nav-link d-flex align-items-center gap-1.5" id="tab-btn-ingest" onclick="switchView('ingest')">
+                    <i class="bi bi-cloud-arrow-up-fill text-success"></i>
+                    <span>Data Ingestion</span>
+                </button>
+            </nav>
+
+            <!-- Quick Status & Utility Actions -->
+            <div class="d-flex align-items-center gap-2">
+                <div id="neo4j-status-pill" class="badge bg-dark text-secondary border border-secondary d-flex align-items-center gap-1.5 py-1.5 px-2.5">
+                    <span class="status-dot bg-warning"></span>
+                    <span id="neo4j-status-text" class="tiny-text font-mono">Connecting...</span>
+                </div>
+
+                <button class="btn btn-sm btn-danger d-flex align-items-center gap-1.5 shadow" id="btn-global-apb" onclick="triggerAPBBroadcast(null)" title="Broadcast All-Points Bulletin to All Police Stations">
+                    <i class="bi bi-broadcast"></i>
+                    <span class="d-none d-lg-inline">Broadcast APB</span>
+                </button>
+
+                <button class="btn btn-sm btn-outline-warning" id="btn-run-pagerank" title="Recompute Betweenness Centrality & Threat Metrics">
+                    <i class="bi bi-cpu me-1"></i>
+                    <span class="d-none d-md-inline">Recompute ML</span>
+                </button>
+
+                <button class="btn btn-sm btn-outline-secondary" id="btn-reload-graph" title="Refresh Graph Data">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+
+                <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#howItWorksModal" title="Open System Guide">
+                    <i class="bi bi-question-circle text-info me-1"></i>
+                    <span class="d-none d-md-inline">Guide</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- TAB 1: DEDICATED SYNDICATE NETWORK GRAPH -->
+    <div id="view-graph" class="app-view active">
+        <!-- Live System Metric Ticker Bar -->
+        <div class="metric-ticker px-3 py-1.5 bg-dark border-bottom border-secondary-subtle d-flex align-items-center justify-content-between overflow-x-auto">
+            <div class="d-flex align-items-center gap-3 tiny-text">
+                <div><span class="text-secondary">Suspects:</span> <strong class="text-danger font-mono" id="stat-suspects">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">Bank Accounts:</span> <strong class="text-warning font-mono" id="stat-accounts">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">Phones:</span> <strong class="text-primary font-mono" id="stat-phones">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">Vehicles:</span> <strong class="text-purple font-mono" style="color: #c084fc;" id="stat-vehicles">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">FIR Cases:</span> <strong class="text-info font-mono" id="stat-firs">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">Active Threats:</span> <strong class="text-danger font-mono" id="stat-threats">0</strong></div>
+                <div class="border-start border-secondary ps-3"><span class="text-secondary">Traced Volume:</span> <strong class="text-white font-mono" id="stat-fraud-volume">₹0</strong></div>
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-2">
+                <span class="badge bg-secondary-subtle text-light font-mono tiny-text">Canvas: Sky Blue (#87CEEB)</span>
+            </div>
+        </div>
+
+        <div class="container-fluid px-0 main-container d-flex">
+            
+            <!-- Left Filter & Control Sidebar -->
+            <aside class="left-sidebar p-3 border-end border-secondary-subtle d-flex flex-column gap-3">
+                <!-- Search Entity Box -->
+                <div class="position-relative">
+                    <label class="form-label text-secondary small fw-semibold mb-1 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-search me-1"></i>Search & Fly-To</span>
+                        <span class="tiny-text text-secondary font-mono" id="search-hint">Hit Enter</span>
+                    </label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" id="search-input" class="form-control bg-dark border-secondary font-mono text-light" placeholder="Suspect, Phone, A/C, Veh #..." autocomplete="off">
+                        <button class="btn btn-primary" type="button" id="btn-search-go" title="Search & Fly To">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" id="btn-search-clear" title="Clear">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                    <div id="search-results-dropdown" class="dropdown-menu bg-surface border-secondary shadow p-1 w-100 mt-1 d-none" style="z-index: 2050; max-height: 260px; overflow-y: auto;">
+                        <!-- Dynamic Autocomplete Results -->
+                    </div>
+                </div>
+
+                <!-- Threat Filter Toggle -->
+                <div>
+                    <div class="form-check form-switch p-2 bg-surface rounded border border-danger-subtle d-flex align-items-center justify-content-between">
+                        <label class="form-check-label small fw-bold text-danger mb-0 cursor-pointer" for="switch-threats-only">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Threats Only
+                        </label>
+                        <input class="form-check-input ms-0 me-1 cursor-pointer" type="checkbox" role="switch" id="switch-threats-only">
+                    </div>
+                </div>
+
+                <!-- Syndicate Cluster Quick Isolation Filter -->
+                <div>
+                    <label class="form-label text-secondary small fw-semibold mb-1.5 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-diagram-2 me-1"></i>Syndicate Region</span>
+                    </label>
+                    <div class="d-flex flex-column gap-1" id="syndicate-filter-buttons">
+                        <button class="btn btn-xs btn-outline-secondary active text-start py-1 px-2" data-syndicate="ALL">
+                            <i class="bi bi-grid-fill me-1"></i>All Syndicates & Bridges
+                        </button>
+                        <button class="btn btn-xs btn-outline-danger text-start py-1 px-2" data-syndicate="delhi">
+                            <span class="legend-dot bg-danger"></span>Delhi BEC & Extortion
+                        </button>
+                        <button class="btn btn-xs btn-outline-warning text-start py-1 px-2" data-syndicate="mumbai">
+                            <span class="legend-dot bg-warning"></span>Mumbai Trafficking & Mule Hub
+                        </button>
+                        <button class="btn btn-xs btn-outline-success text-start py-1 px-2" data-syndicate="bengaluru">
+                            <span class="legend-dot bg-success"></span>Bengaluru Loan App Doxxers
+                        </button>
+                        <button class="btn btn-xs btn-outline-purple text-start py-1 px-2" style="color: #c084fc; border-color: #8b5cf6;" data-syndicate="kolkata">
+                            <span class="legend-dot" style="background:#8b5cf6;"></span>Kolkata Cross-Border Hawala
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Entity Type Filters -->
+                <div>
+                    <label class="form-label text-secondary small fw-semibold mb-1.5">
+                        <i class="bi bi-funnel me-1"></i>Filter Entities
+                    </label>
+                    <div class="d-flex flex-wrap gap-1 filter-btn-group" id="filter-type-buttons">
+                        <button class="btn btn-xs btn-outline-secondary active" data-filter="ALL">ALL</button>
+                        <button class="btn btn-xs btn-outline-danger" data-filter="Suspect">Suspects</button>
+                        <button class="btn btn-xs btn-outline-warning" data-filter="BankAccount">Accounts</button>
+                        <button class="btn btn-xs btn-outline-primary" data-filter="Phone">Phones</button>
+                        <button class="btn btn-xs btn-outline-info" data-filter="Vehicle">Vehicles</button>
+                        <button class="btn btn-xs btn-outline-success" data-filter="Location">Locations</button>
+                    </div>
+                </div>
+
+                <!-- Risk Threshold Slider -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label text-secondary small fw-semibold mb-0">
+                            <i class="bi bi-speedometer2 me-1"></i>Min Risk Score
+                        </label>
+                        <span class="badge text-bg-secondary font-mono" id="risk-val-badge">0.00</span>
+                    </div>
+                    <input type="range" class="form-range" id="risk-slider" min="0.0" max="0.9" step="0.05" value="0.0">
+                </div>
+
+                <!-- Quick Visual Legend -->
+                <div class="mt-auto pt-2 border-top border-secondary-subtle">
+                    <div class="text-secondary small fw-semibold mb-1.5 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-palette me-1"></i>Entity Legend</span>
+                    </div>
+                    <div class="row g-1 tiny-text">
+                        <div class="col-6"><span class="legend-dot" style="background: #ef4444;"></span> Suspect</div>
+                        <div class="col-6"><span class="legend-dot" style="background: #8b5cf6;"></span> Vehicle</div>
+                        <div class="col-6"><span class="legend-dot" style="background: #f59e0b;"></span> Account</div>
+                        <div class="col-6"><span class="legend-dot" style="background: #10b981;"></span> Location</div>
+                        <div class="col-6"><span class="legend-dot" style="background: #3b82f6;"></span> Phone</div>
+                        <div class="col-6"><span class="legend-dot" style="background: #0284c7;"></span> FIR Case</div>
+                    </div>
+                    <div class="tiny-text text-secondary mt-2 bg-darker p-1.5 rounded border border-secondary">
+                        • <strong>Radius:</strong> <code>centrality_score</code> broker power<br>
+                        • <strong>Pulsing Ring:</strong> Flagged Threat
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Graph SVG Viewport (STRICTLY SKY BLUE CANVAS) -->
+            <main class="flex-grow-1 position-relative graph-canvas-container" id="graph-viewport">
+                
+                <!-- Floating Controls: Zoom, Layout Switcher & Threat Demos -->
+                <div class="position-absolute top-0 start-0 m-3 d-flex flex-wrap gap-2 z-3">
+                    <!-- Zoom Controls -->
+                    <div class="btn-group btn-group-sm bg-darker rounded border border-secondary shadow">
+                        <button class="btn btn-outline-light" id="btn-zoom-in" title="Zoom In"><i class="bi bi-zoom-in"></i></button>
+                        <button class="btn btn-outline-light" id="btn-zoom-out" title="Zoom Out"><i class="bi bi-zoom-out"></i></button>
+                        <button class="btn btn-outline-light" id="btn-zoom-reset" title="Reset Viewport"><i class="bi bi-arrows-fullscreen"></i></button>
+                    </div>
+
+                    <!-- Layout Mode Switcher -->
+                    <div class="btn-group btn-group-sm bg-darker rounded border border-info shadow" id="layout-mode-group">
+                        <button class="btn btn-xs btn-outline-info active" data-layout="cluster" title="Group entities into 4 regional syndicate island bubbles">
+                            <i class="bi bi-grid-3x3-gap-fill me-1"></i>Syndicate Islands
+                        </button>
+                        <button class="btn btn-xs btn-outline-info" data-layout="hierarchy" title="Top-down crime hierarchy (Kingpin -> Operatives -> Assets)">
+                            <i class="bi bi-diagram-3-fill me-1"></i>Hierarchy Tree
+                        </button>
+                        <button class="btn btn-xs btn-outline-info" data-layout="force" title="Organic spring force physics">
+                            <i class="bi bi-shuffle me-1"></i>Organic Force
+                        </button>
+                    </div>
+
+                    <!-- Quick Scenarios Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-dark border-secondary dropdown-toggle d-flex align-items-center gap-1.5 shadow" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-stars text-warning"></i>
+                            <span>⚡ Threat Demos</span>
+                        </button>
+                        <ul class="dropdown-menu bg-dark border-secondary shadow-lg">
+                            <li><a class="dropdown-item text-light small d-flex align-items-center gap-2" href="#" onclick="focusScenario('sim_churn')"><i class="bi bi-sim text-danger"></i>1. SIM Churn (85%+ Match)</a></li>
+                            <li><a class="dropdown-item text-light small d-flex align-items-center gap-2" href="#" onclick="focusScenario('logistics')"><i class="bi bi-airplane-engines text-warning"></i>2. Women's Safety / Logistics</a></li>
+                            <li><a class="dropdown-item text-light small d-flex align-items-center gap-2" href="#" onclick="focusScenario('bts')"><i class="bi bi-broadcast text-info"></i>3. BTS Co-Location (10m)</a></li>
+                            <li><a class="dropdown-item text-light small d-flex align-items-center gap-2" href="#" onclick="focusScenario('vehicle')"><i class="bi bi-car-front text-purple" style="color: #c084fc;"></i>4. Vehicle & Fuzzy Match</a></li>
+                            <li><a class="dropdown-item text-light small d-flex align-items-center gap-2" href="#" onclick="focusScenario('centrality')"><i class="bi bi-pie-chart text-success"></i>5. Highest Broker Influence</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Tour Playback Toggle Button -->
+                    <button class="btn btn-sm btn-primary shadow d-flex align-items-center gap-1.5" id="btn-toggle-story">
+                        <i class="bi bi-play-circle-fill"></i>
+                        <span>Crime Story Walkthrough</span>
+                    </button>
+                </div>
+
+                <!-- Interactive Crime Story Narrator Floating Bar -->
+                <div class="crime-story-bar p-3 d-flex align-items-center justify-content-between shadow-lg" id="crime-story-panel">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="story-step-badge badge text-bg-danger font-mono fs-6 px-2.5 py-1.5 shadow" id="story-step-indicator">
+                            Step 1/5
+                        </div>
+                        <div>
+                            <div class="fw-bold text-light small d-flex align-items-center gap-2">
+                                <span id="story-step-title">FIR Registered: Extortion & Cyber Heist</span>
+                                <span class="badge text-bg-warning text-dark tiny-text font-mono" id="story-step-tag">DELHI CLUSTER</span>
+                            </div>
+                            <div class="tiny-text text-secondary text-truncate" style="max-width: 440px;" id="story-step-desc">
+                                Special Cell FIR-2026-DEL-101 intercepted extortion racket involving car DL-01-AB-1234 and mule accounts.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-xs btn-outline-secondary" id="btn-story-prev" title="Previous Clue">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-xs btn-primary px-2.5" id="btn-story-next" title="Advance to Next Clue">
+                            <span>Next Clue</span>
+                            <i class="bi bi-chevron-right ms-1"></i>
+                        </button>
+                        <button class="btn btn-xs btn-outline-warning" id="btn-story-auto" title="Auto-advance story tour">
+                            <i class="bi bi-play-fill me-1"></i>Auto Tour
+                        </button>
+                        <button class="btn btn-xs btn-outline-secondary" id="btn-story-close" title="Close Story Bar">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hover Tooltip Element -->
+                <div id="graph-tooltip"></div>
+
+                <!-- D3 SVG Viewport Element -->
+                <svg id="network-svg" width="100%" height="100%"></svg>
+            </main>
+
+            <!-- Right Forensic Evidence & Detail Side Panel -->
+            <aside class="detail-sidebar border-start border-secondary-subtle p-3 d-flex flex-column" id="detail-sidepanel">
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom border-secondary-subtle mb-3">
+                    <div class="fw-bold text-light d-flex align-items-center gap-2">
+                        <i class="bi bi-fingerprint text-danger"></i>
+                        <span>Forensic Evidence Inspector</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" id="btn-close-sidepanel" title="Close Panel">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Detail Dynamic Content Container -->
+                <div id="sidepanel-content" class="flex-grow-1 overflow-y-auto">
+                    <!-- Dynamically populated -->
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- TAB 2: DEDICATED AGE GROUP IMPACT GRAPH -->
+    <div id="view-age" class="app-view container-fluid p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+            <div>
+                <h4 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-lines-fill text-info"></i>
+                    <span>Criminal Suspects vs. Targeted Victim Age Groups</span>
+                </h4>
+                <p class="small text-secondary mb-0">
+                    Comparative analytical graph illustrating which criminal syndicates victimized specific age brackets (18–25, 26–35, 36–50, 50+).
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-info" onclick="loadAgeAnalyticsData()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh Chart
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="switchView('graph')">
+                    <i class="bi bi-diagram-3 me-1"></i>Syndicate Graph
+                </button>
+            </div>
+        </div>
+
+        <!-- Age Impact KPI Cards -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <div class="card bg-surface border-success p-3 shadow-sm">
+                    <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-mortarboard text-success me-1"></i>18–25 (Students & Youth)</span>
+                    <h5 class="fw-bold text-success mb-1 font-mono" id="age-kpi-youth">98 Victims (23.5%)</h5>
+                    <span class="tiny-text text-secondary">Targeted by: <strong>Rahul Mondal</strong> (Loan App Doxxing)</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-surface border-primary p-3 shadow-sm">
+                    <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-laptop text-primary me-1"></i>26–35 (Young Professionals)</span>
+                    <h5 class="fw-bold text-primary mb-1 font-mono" id="age-kpi-youngpros">134 Victims (32.1%)</h5>
+                    <span class="tiny-text text-secondary">Targeted by: <strong>Tariq Ali</strong> (Trafficking & BEC)</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-surface border-purple p-3 shadow-sm" style="border-color: #8b5cf6 !important;">
+                    <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-briefcase text-purple me-1" style="color: #c084fc;"></i>36–50 (Execs & Business)</span>
+                    <h5 class="fw-bold text-purple mb-1 font-mono" style="color: #c084fc;" id="age-kpi-execs">127 Victims (30.5%)</h5>
+                    <span class="tiny-text text-secondary">Targeted by: <strong>Vikram Singhania</strong> (Cyber Heist)</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-surface border-danger p-3 shadow-sm">
+                    <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-heart-pulse text-danger me-1"></i>50+ (Senior Pensioners)</span>
+                    <h5 class="fw-bold text-danger mb-1 font-mono" id="age-kpi-seniors">58 Victims (13.9%)</h5>
+                    <span class="tiny-text text-secondary">Targeted by: <strong>Kabir Sheikh</strong> (Hawala Fraud)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dedicated Full-Width Age Chart -->
+        <div class="card bg-surface border-secondary shadow mb-4">
+            <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center py-2.5">
+                <span class="fw-bold text-light small"><i class="bi bi-bar-chart-fill text-info me-1.5"></i>Victim Age Bracket Distribution per Accused Suspect</span>
+                <span class="badge text-bg-info font-mono tiny-text">Grouped Multi-Bar Chart</span>
+            </div>
+            <div class="card-body p-3" style="height: 380px;">
+                <canvas id="chart-age-dedicated"></canvas>
+            </div>
+        </div>
+
+        <!-- Suspect Profiler Card & Breakdown Grid -->
+        <div class="row g-3">
+            <div class="col-lg-5">
+                <div class="card bg-surface border-secondary shadow h-100">
+                    <div class="card-header bg-darker border-secondary py-2">
+                        <span class="fw-bold text-light small"><i class="bi bi-person-badge text-warning me-1.5"></i>Suspect Demographic Profiler</span>
+                    </div>
+                    <div class="card-body p-3">
+                        <label class="form-label tiny-text text-secondary mb-1">Select Criminal Suspect:</label>
+                        <select class="form-select form-select-sm bg-dark border-secondary mb-3" id="select-age-suspect">
+                            <option value="Rahul Mondal">Rahul Mondal (Loan App Extortion)</option>
+                            <option value="Vikram Singhania">Vikram Singhania (Corporate BEC Extortion)</option>
+                            <option value="Tariq Ali">Tariq Ali (Trafficking Logistics & BEC)</option>
+                            <option value="Kabir Sheikh">Kabir Sheikh (Hawala & Pension Fraud)</option>
+                            <option value="Amit Verma">Amit Verma (Digital Extortion & Layering)</option>
+                        </select>
+
+                        <div class="p-3 bg-dark rounded border border-secondary-subtle" id="age-suspect-profile-box">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold text-light mb-0" id="age-prof-name">Rahul Mondal</h6>
+                                    <span class="tiny-text text-secondary" id="age-prof-crime">Loan App Extortion</span>
+                                </div>
+                                <span class="badge text-bg-danger font-mono" id="age-prof-loss">₹36.0L Loss</span>
+                            </div>
+                            <div class="tiny-text text-secondary mb-2">
+                                <strong>Primary Target:</strong> <span class="text-info fw-bold" id="age-prof-target">18–25 (College Students)</span>
+                            </div>
+                            <div class="tiny-text text-secondary mb-3">
+                                <strong>Victim Distribution:</strong> <span class="text-warning font-mono" id="age-prof-breakdown">18-25: 42 | 26-35: 28 | 36-50: 6 | 50+: 2</span>
+                            </div>
+                            <button class="btn btn-xs btn-outline-primary w-100" id="btn-age-prof-inspect">
+                                <i class="bi bi-diagram-3 me-1"></i>Inspect Suspect on Syndicate Graph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card bg-surface border-secondary shadow h-100">
+                    <div class="card-header bg-darker border-secondary py-2">
+                        <span class="fw-bold text-light small"><i class="bi bi-table text-info me-1.5"></i>Targeted Age Brackets & Financial Damage Table</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark table-hover border-secondary font-mono tiny-text mb-0 align-middle">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>Suspect Name</th>
+                                        <th>Primary Crime</th>
+                                        <th>18–25</th>
+                                        <th>26–35</th>
+                                        <th>36–50</th>
+                                        <th>50+</th>
+                                        <th>Total Loss</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-age-suspects-tbody">
+                                    <tr><td colspan="7" class="text-center py-3 text-secondary">Loading age impact table...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: DEDICATED GENDER & CRIME VULNERABILITY GRAPH -->
+    <div id="view-gender" class="app-view container-fluid p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+            <div>
+                <h4 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-gender-ambiguous text-warning"></i>
+                    <span>Crime Category vs. Victim Gender Breakdown</span>
+                </h4>
+                <p class="small text-secondary mb-0">
+                    Dedicated vulnerability graph highlighting Male, Female, and Transgender victim proportions across each crime classification.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-warning" onclick="loadGenderAnalyticsData()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Refresh Chart
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="switchView('graph')">
+                    <i class="bi bi-diagram-3 me-1"></i>Syndicate Graph
+                </button>
+            </div>
+        </div>
+
+        <!-- Gender Breakdown KPI Cards -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="card bg-surface border-warning p-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-gender-female text-warning me-1"></i>Female Victims</span>
+                        <span class="badge text-bg-warning text-dark font-mono">44.7% Total</span>
+                    </div>
+                    <h5 class="fw-bold text-warning mb-1 font-mono" id="gender-kpi-female">186 Female Victims</h5>
+                    <span class="tiny-text text-secondary">Peak Vulnerability: <strong>Human Trafficking (80.5% Female)</strong></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-surface border-info p-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-gender-male text-info me-1"></i>Male Victims</span>
+                        <span class="badge text-bg-info font-mono">54.3% Total</span>
+                    </div>
+                    <h5 class="fw-bold text-info mb-1 font-mono" id="gender-kpi-male">226 Male Victims</h5>
+                    <span class="tiny-text text-secondary">Peak Vulnerability: <strong>Corporate BEC Heists (77.9% Male)</strong></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-surface border-secondary p-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="tiny-text text-secondary text-uppercase fw-bold"><i class="bi bi-shield-check text-success me-1"></i>Total Tracked Victims</span>
+                        <span class="badge text-bg-secondary font-mono">100% Coverage</span>
+                    </div>
+                    <h5 class="fw-bold text-light mb-1 font-mono" id="gender-kpi-total">421 Total Victims</h5>
+                    <span class="tiny-text text-secondary">Traced across 5 major organized crime syndicates</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dedicated Full-Width Gender Chart -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-8">
+                <div class="card bg-surface border-secondary shadow h-100">
+                    <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center py-2.5">
+                        <span class="fw-bold text-light small"><i class="bi bi-bar-chart-steps text-warning me-1.5"></i>Male vs. Female Distribution by Crime Category</span>
+                        <span class="badge text-bg-warning text-dark font-mono tiny-text">Horizontal Stacked Distribution</span>
+                    </div>
+                    <div class="card-body p-3" style="height: 380px;">
+                        <canvas id="chart-gender-dedicated"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card bg-surface border-secondary shadow h-100">
+                    <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center py-2.5">
+                        <span class="fw-bold text-light small"><i class="bi bi-pie-chart text-info me-1.5"></i>Aggregate Victim Gender Share</span>
+                        <span class="badge text-bg-info font-mono tiny-text">Donut Share</span>
+                    </div>
+                    <div class="card-body p-3 d-flex align-items-center justify-content-center" style="height: 380px;">
+                        <canvas id="chart-gender-donut"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Vulnerability Audit Table -->
+        <div class="card bg-surface border-secondary shadow">
+            <div class="card-header bg-darker border-secondary py-2.5">
+                <span class="fw-bold text-light small"><i class="bi bi-table text-warning me-1.5"></i>Comprehensive Gender & Crime Category Impact Audit</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover border-secondary font-mono tiny-text mb-0 align-middle">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Crime Category</th>
+                                <th>Male Victims</th>
+                                <th>Female Victims</th>
+                                <th>Other / Non-Binary</th>
+                                <th>Total Impacted</th>
+                                <th>Female Ratio %</th>
+                                <th>Primary Vulnerability Alert</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-gender-dedicated-tbody">
+                            <tr><td colspan="7" class="text-center py-3 text-secondary">Loading gender crime table...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: DEDICATED GEOSPATIAL CRIME & FRAUD HEATMAP -->
+    <div id="view-heatmap" class="app-view container-fluid p-3 d-none">
+        <!-- Heatmap Top Metric Ribbon & Layer Controls -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-2.5 bg-dark rounded border border-secondary mb-2 shadow-sm">
+            <div class="d-flex align-items-center gap-3 tiny-text flex-wrap">
+                <div><i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Top Crime Hub:</strong> <span class="text-danger font-mono fw-bold" id="heatmap-top-hub">Delhi NCR (0.95)</span></div>
+                <div class="border-start border-secondary ps-3"><i class="bi bi-building me-1 text-info"></i><strong>Jurisdictions:</strong> <span class="text-info font-mono" id="heatmap-total-cities">6</span></div>
+                <div class="border-start border-secondary ps-3"><i class="bi bi-broadcast me-1 text-purple" style="color: #c084fc;"></i><strong>Active BTS Towers:</strong> <span class="text-purple font-mono" id="heatmap-total-towers">4</span></div>
+                <div class="border-start border-secondary ps-3"><i class="bi bi-truck me-1 text-warning"></i><strong>Transit Corridors:</strong> <span class="text-warning font-mono" id="heatmap-total-corridors">3</span></div>
+                <div class="border-start border-secondary ps-3"><i class="bi bi-cash-stack me-1 text-success"></i><strong>Mapped Fraud:</strong> <span class="text-success font-mono fw-bold" id="heatmap-total-fraud">₹2.43Cr</span></div>
+            </div>
+
+            <!-- Layer Toggles -->
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="form-check form-check-inline form-switch m-0 tiny-text">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="layer-toggle-heat" checked>
+                    <label class="form-check-label text-danger fw-bold cursor-pointer" for="layer-toggle-heat">🔥 Heat Density</label>
+                </div>
+                <div class="form-check form-check-inline form-switch m-0 tiny-text">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="layer-toggle-markers" checked>
+                    <label class="form-check-label text-info fw-bold cursor-pointer" for="layer-toggle-markers">📍 City Hubs</label>
+                </div>
+                <div class="form-check form-check-inline form-switch m-0 tiny-text">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="layer-toggle-towers" checked>
+                    <label class="form-check-label text-purple fw-bold cursor-pointer" style="color: #c084fc;" for="layer-toggle-towers">📡 BTS Towers</label>
+                </div>
+                <div class="form-check form-check-inline form-switch m-0 tiny-text">
+                    <input class="form-check-input cursor-pointer" type="checkbox" id="layer-toggle-corridors" checked>
+                    <label class="form-check-label text-warning fw-bold cursor-pointer" for="layer-toggle-corridors">🚗 Transit Routes</label>
+                </div>
+                <button class="btn btn-xs btn-outline-light ms-1" id="btn-reset-map" title="Center Map on India">
+                    <i class="bi bi-arrows-fullscreen me-1"></i>Center India
+                </button>
+            </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="crime-heatmap-container" style="height: calc(100vh - 135px); width: 100%; border-radius: 8px; border: 1px solid #334155; position: relative;"></div>
+    </div>
+
+    <!-- TAB 5: DEDICATED THREAT CENTER -->
+    <div id="view-threats" class="app-view container-fluid p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+            <div>
+                <h4 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-exclamation text-danger"></i>
+                    <span>Threat Intelligence Center</span>
+                </h4>
+                <p class="small text-secondary mb-0">
+                    Automated ML threat detection engine tracking SIM churn switches, BTS co-locations, and anti-trafficking logistics patterns.
+                </p>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="switchView('graph')">
+                <i class="bi bi-arrow-left me-1"></i>Back to Graph View
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <!-- 1. SIM Churn Card -->
+            <div class="col-lg-4">
+                <div class="card bg-surface border-secondary h-100 shadow">
+                    <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-danger small"><i class="bi bi-sim-fill me-1"></i>SIM Churn Engine</span>
+                        <span class="badge text-bg-danger">&ge; 85% Target Overlap</span>
+                    </div>
+                    <div class="card-body p-3 small" id="threat-simchurn-container">
+                        <p class="text-secondary tiny-text">Bipartite graph matching scanning deactivated phone numbers against newly activated numbers.</p>
+                        <div class="p-2.5 rounded bg-dark border border-danger-subtle mb-2">
+                            <div class="fw-bold text-light">Phone 9820099881 &rarr; 9899011222</div>
+                            <div class="text-danger fw-bold tiny-text">100% Target Overlap (4 Accomplices Matched)</div>
+                            <div class="text-secondary tiny-text mt-1">Both lines called: Tariq Ali, Kabir Sheikh, Amit Verma, Vikram Singhania.</div>
+                            <button class="btn btn-xs btn-outline-danger w-100 mt-2" onclick="switchView('graph'); focusScenario('sim_churn');">
+                                <i class="bi bi-diagram-3 me-1"></i>Inspect On Graph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Logistics Safety Card -->
+            <div class="col-lg-4">
+                <div class="card bg-surface border-secondary h-100 shadow">
+                    <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-warning small"><i class="bi bi-airplane-engines-fill me-1"></i>Logistics Filter</span>
+                        <span class="badge text-bg-warning text-dark">Women's Safety</span>
+                    </div>
+                    <div class="card-body p-3 small" id="threat-logistics-container">
+                        <p class="text-secondary tiny-text">Scans transactions for repetitive transit tickets alongside high-frequency short hotel stays.</p>
+                        <div class="p-2.5 rounded bg-dark border border-warning-subtle mb-2">
+                            <div class="fw-bold text-light">Account: 440192837461</div>
+                            <div class="text-warning fw-bold tiny-text">Flagged: 3 Transit Bookings + 3 Hotel Stays</div>
+                            <div class="text-secondary tiny-text mt-1">IRCTC, RedBus, MakeMyTrip paired with OYO Rooms & Treebo stays.</div>
+                            <button class="btn btn-xs btn-outline-warning w-100 mt-2" onclick="switchView('graph'); focusScenario('logistics');">
+                                <i class="bi bi-diagram-3 me-1"></i>Inspect On Graph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. BTS Co-Location Card -->
+            <div class="col-lg-4">
+                <div class="card bg-surface border-secondary h-100 shadow">
+                    <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-info small"><i class="bi bi-broadcast-pin me-1"></i>BTS Co-Location</span>
+                        <span class="badge text-bg-info">&le; 10 min Window</span>
+                    </div>
+                    <div class="card-body p-3 small" id="threat-bts-container">
+                        <p class="text-secondary tiny-text">Identifies distinct suspect phones registering pings at identical cell towers.</p>
+                        <div class="p-2.5 rounded bg-dark border border-info-subtle mb-2">
+                            <div class="fw-bold text-light">Tower: TOWER-DEL-402 (Delhi)</div>
+                            <div class="text-info fw-bold tiny-text">Delta: 3.6 min (Phone 9810011223 & 9811099887)</div>
+                            <div class="text-secondary tiny-text mt-1">Both suspects co-located during crime execution window.</div>
+                            <button class="btn btn-xs btn-outline-info w-100 mt-2" onclick="switchView('graph'); focusScenario('bts');">
+                                <i class="bi bi-diagram-3 me-1"></i>Inspect On Graph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 6: DEDICATED BSA 2023 EVIDENCE REGISTRY -->
+    <div id="view-bsa" class="app-view container-fluid p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+            <div>
+                <h4 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-lock2-fill text-info"></i>
+                    <span>Bharatiya Sakshya Adhiniyam, 2023 — Section 63(4) Evidence Registry</span>
+                </h4>
+                <p class="small text-secondary mb-0">
+                    Cryptographic integrity log. Every ingested CSV and FIR text is hashed with SHA-256 immediately upon ingestion to generate Section 63(4) court-admissible certificates.
+                </p>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="switchView('graph')">
+                <i class="bi bi-arrow-left me-1"></i>Back to Graph View
+            </button>
+        </div>
+
+        <div class="card bg-surface border-secondary shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover border-secondary font-mono small mb-0 align-middle">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Evidence File / Label</th>
+                                <th>SHA-256 Cryptographic Hash Digest</th>
+                                <th>Ingestion Timestamp</th>
+                                <th class="text-end">Section 63(4) PDF</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bsa-full-registry-tbody">
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-secondary">Loading cryptographic evidence registry...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 7: DEDICATED DATA INGESTION HUB -->
+    <div id="view-ingest" class="app-view container-fluid p-4 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+            <div>
+                <h4 class="fw-bold text-light mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-cloud-arrow-up-fill text-warning"></i>
+                    <span>Data Ingestion & Cryptographic Hashing Hub</span>
+                </h4>
+                <p class="small text-secondary mb-0">
+                    Ingest raw police FIRs, Call Detail Records (CDRs), or financial transaction CSVs with instant SHA-256 sealing.
+                </p>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="switchView('graph')">
+                <i class="bi bi-arrow-left me-1"></i>Back to Graph View
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left: Live FIR Text Ingestion -->
+            <div class="col-lg-6">
+                <div class="card bg-surface border-secondary h-100 shadow">
+                    <div class="card-header bg-darker border-secondary">
+                        <span class="fw-bold text-light small d-flex align-items-center gap-1.5">
+                            <i class="bi bi-pencil-square text-danger"></i>
+                            <span>1. Ingest Live FIR Narrative (spaCy NLP)</span>
+                        </span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary tiny-text fw-bold mb-1">Load Demo Case Template:</label>
+                            <div class="btn-group btn-group-sm w-100">
+                                <button type="button" class="btn btn-outline-secondary" id="btn-template-crypto">Cyber Extortion (Vehicle & CDR)</button>
+                                <button type="button" class="btn btn-outline-secondary" id="btn-template-phishing">Loan App (Fuzzy Names)</button>
+                                <button type="button" class="btn btn-outline-secondary" id="btn-template-hawala">Interstate Syndicate</button>
+                            </div>
+                        </div>
+
+                        <form id="ingest-fir-form">
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-4">
+                                    <label class="form-label tiny-text text-secondary mb-1">FIR Number</label>
+                                    <input type="text" class="form-control form-control-sm bg-dark border-secondary font-mono" id="fir-number-input" required placeholder="e.g. FIR-2026-DEL-109">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label tiny-text text-secondary mb-1">Police Station</label>
+                                    <input type="text" class="form-control form-control-sm bg-dark border-secondary" id="police-station-input" value="Special Cell Cyber Crime PS">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label tiny-text text-secondary mb-1">State</label>
+                                    <input type="text" class="form-control form-control-sm bg-dark border-secondary" id="state-input" value="Delhi">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label tiny-text text-secondary mb-1">Unstructured FIR Narrative Text</label>
+                                <textarea class="form-control bg-dark border-secondary" id="fir-text-input" rows="6" required placeholder="Paste narrative containing suspects, bank accounts, mobile numbers, vehicle registration numbers (e.g. DL-01-AB-1234), and cell tower locations..."></textarea>
+                                <div class="tiny-text text-secondary mt-1">
+                                    spaCy NLP will extract <code>PERSON</code>, <code>LOC</code>, <code>BANK_ACC</code>, <code>VEHICLE_REG</code>, and perform Levenshtein suspect deduplication (dist &le; 2).
+                                </div>
+                            </div>
+
+                            <div id="ingest-alert" class="alert d-none py-2 px-3 small"></div>
+
+                            <button type="submit" class="btn btn-sm btn-danger w-100 d-flex align-items-center justify-content-center gap-1.5" id="btn-submit-fir">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Ingest & Cryptographically Seal Record</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Bulk File Upload -->
+            <div class="col-lg-6">
+                <div class="card bg-surface border-secondary h-100 shadow">
+                    <div class="card-header bg-darker border-secondary">
+                        <span class="fw-bold text-light small d-flex align-items-center gap-1.5">
+                            <i class="bi bi-file-earmark-arrow-up text-info"></i>
+                            <span>2. Bulk Dataset Upload (CSV / TXT)</span>
+                        </span>
+                    </div>
+                    <div class="card-body p-3">
+                        <form id="upload-file-form">
+                            <div class="mb-3">
+                                <label class="form-label tiny-text text-secondary mb-1">Select Dataset Format</label>
+                                <select class="form-select form-select-sm bg-dark border-secondary" id="upload-file-type" required>
+                                    <option value="cdr_csv">Call Detail Records (CDR CSV: caller, callee, tower_id, timestamp, duration)</option>
+                                    <option value="financial_csv">Financial Transaction Logs (CSV: from_account, to_account, amount, category, merchant, date)</option>
+                                    <option value="fir_csv">FIR Cases Dataset (CSV: fir_number, police_station, incident_date, state, raw_text)</option>
+                                    <option value="fir_text">Raw Case Narrative File (.txt / FIR export)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label tiny-text text-secondary mb-1">Choose File from Computer</label>
+                                <input type="file" class="form-control form-control-sm bg-dark border-secondary" id="file-input-element" required accept=".csv,.txt">
+                                <div class="tiny-text text-secondary mt-1">
+                                    Instant SHA-256 hash calculation guarantees compliance with Section 63(4) BSA 2023.
+                                </div>
+                            </div>
+
+                            <div id="upload-alert" class="alert d-none py-2 px-3 small"></div>
+
+                            <button type="submit" class="btn btn-sm btn-info w-100 d-flex align-items-center justify-content-center gap-1.5" id="btn-submit-upload">
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                                <span>Upload, Hash & Ingest Dataset</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Interactive System Guide & Architecture Manual -->
+    <div class="modal fade" id="howItWorksModal" tabindex="-1" aria-labelledby="howItWorksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-surface border-secondary text-light">
+                <div class="modal-header border-secondary bg-darker">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="howItWorksModalLabel">
+                        <i class="bi bi-shield-shaded text-danger fs-4"></i>
+                        <span>NEXUS GRAPH // Interactive System Guide & Architecture Manual</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Why Built -->
+                    <div class="card bg-dark border-secondary mb-4">
+                        <div class="card-body p-3">
+                            <h5 class="fw-bold text-warning mb-2 d-flex align-items-center gap-2">
+                                <i class="bi bi-lightbulb-fill"></i>
+                                <span>Why Was Nexus Graph Built?</span>
+                            </h5>
+                            <p class="small text-secondary mb-2">
+                                Criminal syndicates intentionally switch SIM cards, use slightly different name spellings across police stations (*"Rahul"* vs *"Raahul"*), move money across multiple mule bank accounts, and use getaway vehicles to evade detection.
+                            </p>
+                            <p class="small text-secondary mb-0">
+                                <strong>Nexus Graph</strong> solves this by fusing unstructured First Information Reports (FIRs), Telecom Call Detail Records (CDRs), and Financial Logs into an automated <strong>Graph AI & Legal Cryptography Engine</strong> compliant with <strong>Section 63(4) of Bharatiya Sakshya Adhiniyam, 2023 (BSA 2023)</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Core Functions -->
+                    <h5 class="fw-bold text-light mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-gear-wide-connected text-info"></i>
+                        <span>Dedicated Visualizer Tabs</span>
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                <div class="fw-bold text-info mb-1"><i class="bi bi-person-lines-fill me-1"></i>Age Group Impact Graph</div>
+                                <div class="tiny-text text-secondary">
+                                    Dedicated chart comparing which criminals victimize which age brackets ($18\text{--}25, 26\text{--}35, 36\text{--}50, 50+$) with loss values.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                <div class="fw-bold text-warning mb-1"><i class="bi bi-gender-ambiguous me-1"></i>Gender & Crime Vulnerability</div>
+                                <div class="tiny-text text-secondary">
+                                    Dedicated chart analyzing gender targeting across Human Trafficking, Loan Apps, BEC Heists, and Hawala fraud.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                <div class="fw-bold text-danger mb-1"><i class="bi bi-geo-alt-fill me-1"></i>Geospatial Crime Heatmap</div>
+                                <div class="tiny-text text-secondary">
+                                    Visualizes crime density, active BTS cell towers, and transit corridors across Delhi, Mumbai, Bengaluru, and Kolkata with Leaflet heat density.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                <div class="fw-bold text-purple mb-1" style="color: #c084fc;"><i class="bi bi-diagram-3-fill me-1"></i>Syndicate Force Graph</div>
+                                <div class="tiny-text text-secondary">
+                                    D3 force-directed network graph on sky blue canvas with Betweenness Centrality broker radius sizing.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary bg-darker">
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Close Manual</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Interactive Nationwide Police Station Broadcast (APB Alert) -->
+    <div class="modal fade" id="apbBroadcastModal" tabindex="-1" aria-labelledby="apbBroadcastModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-surface border-danger text-light shadow-lg">
+                <div class="modal-header border-danger bg-darker py-2.5">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge text-bg-danger px-2 py-1"><i class="bi bi-broadcast me-1"></i>INTER-AGENCY APB</span>
+                        <h5 class="modal-title fw-bold mb-0 text-light" id="apbBroadcastModalLabel">
+                            Nationwide Police Station APB Dispatch Wizard
+                        </h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3.5">
+                    
+                    <!-- STAGE 1: MANUAL STATION & COMPONENT SELECTION -->
+                    <div id="apb-setup-stage">
+                        <!-- Suspect Intelligence Target Header -->
+                        <div class="card bg-dark border-secondary mb-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge text-bg-danger mb-1">Target Criminal Suspect</span>
+                                        <h5 class="fw-bold text-light mb-0" id="apb-config-suspect-name">Vikram Singhania</h5>
+                                        <span class="tiny-text font-mono text-secondary" id="apb-config-suspect-id">SUSPECT:vikram_singhania</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <label class="form-label tiny-text text-secondary mb-1 fw-bold">Priority Level:</label>
+                                        <select class="form-select form-select-sm bg-darker border-danger text-danger fw-bold font-mono py-0" id="apb-select-priority">
+                                            <option value="FLASH_RED_ALERT">🚨 FLASH RED ALERT (Immediate Intercept)</option>
+                                            <option value="HIGH_PRIORITY_APB">⚠️ HIGH PRIORITY APB (Lookout Notice)</option>
+                                            <option value="CONFIDENTIAL_INQUIRY">📋 CONFIDENTIAL INQUIRY (Asset Freezing)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="tiny-text text-secondary">
+                                    <strong>Unified Aliases:</strong> <span class="text-info font-mono" id="apb-config-aliases">Vikram Singhania, Vikram Singhaniya</span> | 
+                                    <strong>Vehicles:</strong> <span class="text-purple font-mono" style="color: #c084fc;" id="apb-config-vehicles">DL-01-AB-1234</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Station Selection Multi-Checklist -->
+                        <div class="card bg-dark border-secondary mb-3">
+                            <div class="card-header bg-darker py-2 px-3 border-secondary d-flex justify-content-between align-items-center">
+                                <span class="tiny-text fw-bold text-warning text-uppercase d-flex align-items-center gap-1.5">
+                                    <i class="bi bi-building-fill-check"></i>
+                                    <span>Select Destination Police Stations & Cyber Cells</span>
+                                </span>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-xs btn-outline-secondary" id="btn-apb-select-all">Select All (8)</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary" id="btn-apb-select-metro">Metros Only</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary" id="btn-apb-clear-all">Clear</button>
+                                </div>
+                            </div>
+                            <div class="card-body p-2.5">
+                                <div class="row g-2" id="apb-stations-checkbox-grid">
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="delhi_special_cell" id="st-delhi" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-delhi">
+                                                <strong>Delhi:</strong> Special Cell Cyber Crime PS
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Lodhi Colony, Delhi NCR</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="mumbai_bkc" id="st-mumbai" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-mumbai">
+                                                <strong>Mumbai:</strong> Cyber Police Station (BKC)
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Bandra Kurla Complex, Mumbai</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="bengaluru_stf" id="st-bengaluru" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-bengaluru">
+                                                <strong>Bengaluru:</strong> Cyber Economic STF
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Indiranagar, Bengaluru City</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="kolkata_stf" id="st-kolkata" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-kolkata">
+                                                <strong>Kolkata:</strong> STF Cyber Cell (Sector V)
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Salt Lake, Kolkata STF & CID</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="hyderabad_cid" id="st-hyderabad" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-hyderabad">
+                                                <strong>Hyderabad:</strong> Cyber Crime PS (CID HQ)
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Lakdikapool, Hyderabad Commissionerate</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="jaipur_stf" id="st-jaipur" checked>
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-jaipur">
+                                                <strong>Jaipur:</strong> State Cyber Police Station
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Central Police Lines, Jaipur HQ</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="chennai_cyber" id="st-chennai">
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-chennai">
+                                                <strong>Chennai:</strong> State Cyber Crime Division
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Greater Chennai Police HQ</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check p-2 bg-darker rounded border border-secondary-subtle">
+                                            <input class="form-check-input ms-0 me-2 station-checkbox" type="checkbox" value="ahmedabad_cid" id="st-gujarat">
+                                            <label class="form-check-label tiny-text text-light fw-semibold cursor-pointer" for="st-gujarat">
+                                                <strong>Gujarat:</strong> CID Cyber Crime Cell
+                                                <div class="text-secondary" style="font-size: 0.7rem;">Gandhinagar, Gujarat State Cyber Grid</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Intelligence Components to Transmit -->
+                        <div class="p-2.5 bg-dark rounded border border-secondary-subtle mb-3">
+                            <label class="form-label tiny-text text-secondary fw-bold text-uppercase mb-1.5 d-block">
+                                <i class="bi bi-shield-lock me-1 text-info"></i>Include Intelligence Layers:
+                            </label>
+                            <div class="d-flex flex-wrap gap-3 tiny-text">
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input" type="checkbox" id="apb-inc-vehicles" checked>
+                                    <label class="form-check-label text-light cursor-pointer" for="apb-inc-vehicles">🚗 Getaway Vehicles & Highway Flags</label>
+                                </div>
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input" type="checkbox" id="apb-inc-accounts" checked>
+                                    <label class="form-check-label text-light cursor-pointer" for="apb-inc-accounts">💳 Frozen Mule Bank Accounts</label>
+                                </div>
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input" type="checkbox" id="apb-inc-phones" checked>
+                                    <label class="form-check-label text-light cursor-pointer" for="apb-inc-phones">📱 Intercepted MSISDN & SIM Churn</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Big Manual Dispatch Button -->
+                        <button type="button" class="btn btn-danger w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 shadow" id="btn-execute-apb-dispatch">
+                            <i class="bi bi-broadcast fs-5"></i>
+                            <span id="btn-dispatch-text">🚨 TRANSMIT INTELLIGENCE PACKET TO SELECTED STATIONS</span>
+                        </button>
+                    </div>
+
+                    <!-- STAGE 2: LIVE TRANSMISSION RESULTS & BSA CERTIFICATE -->
+                    <div id="apb-results-stage" class="d-none">
+                        <!-- Dispatch Status Banner -->
+                        <div class="alert alert-danger py-2 px-3 mb-3 border-danger d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold" id="apb-status-title">All-Points Bulletin Successfully Transmitted!</div>
+                                <span class="tiny-text font-mono" id="apb-cctns-ref">CCTNS National Gateway Ref: CCTNS-NATGRID-889102</span>
+                            </div>
+                            <span class="badge text-bg-dark font-mono border border-danger fs-6" id="apb-broadcast-id">APB-20260901-8911</span>
+                        </div>
+
+                        <!-- Real-Time Transmission Table -->
+                        <div class="card bg-dark border-secondary-subtle mb-3">
+                            <div class="card-header bg-darker py-1.5 px-3 border-secondary d-flex justify-content-between align-items-center">
+                                <span class="tiny-text fw-bold text-info text-uppercase"><i class="bi bi-building-check me-1"></i>State Police Station Receipt Acknowledgments</span>
+                                <span class="badge text-bg-success tiny-text font-mono" id="apb-dispatch-count">All Stations Acknowledged</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                    <table class="table table-dark table-sm font-mono tiny-text mb-0 align-middle">
+                                        <thead class="table-secondary">
+                                            <tr>
+                                                <th>Police Station / Cyber Cell</th>
+                                                <th>State</th>
+                                                <th>Transmission Status</th>
+                                                <th class="text-end">Latency</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="apb-stations-tbody">
+                                            <!-- Dynamically generated rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BSA Section 63(4) Legal Hash & Certificate Download -->
+                        <div class="p-2.5 bg-darker rounded border border-info-subtle d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="tiny-text fw-bold text-info"><i class="bi bi-file-earmark-lock2 me-1"></i>Section 63(4) BSA 2023 Digital Certificate Seal:</div>
+                                <span class="tiny-text font-mono text-secondary text-break" id="apb-sha256-seal">d5e963774e7db854812a370f88fd2c113c70424182bbf593a77820b305c29c53</span>
+                            </div>
+                            <a href="#" id="apb-download-cert-btn" class="btn btn-xs btn-outline-info text-nowrap ms-2" target="_blank">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Download Court PDF
+                            </a>
+                        </div>
+
+                        <!-- Reconfigure / Close Controls -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-apb-back-to-setup">
+                                <i class="bi bi-arrow-left me-1"></i>Dispatch to Other Stations
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Done / Close Window</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts: D3.js v7, Leaflet.js, Chart.js and Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="/static/js/graph.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

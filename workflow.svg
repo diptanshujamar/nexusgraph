@@ -1,0 +1,4 @@
+npm install -g svgexport
+pbpaste > workflow.svg
+svgexport workflow.svg workflow.png 1920:
+open workflow.png
